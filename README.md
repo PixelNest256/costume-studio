@@ -110,23 +110,9 @@ npm run preview
 2. GitHub の **Settings → Pages → Build and deployment → Source** で **GitHub Actions** を選びます。
 3. `main` に push すると自動でビルド・公開されます。手動実行は **Actions → Deploy to GitHub Pages → Run workflow** から行えます。
 
-### 公開前に置き換えるもの
+### 公開先
 
-このリポジトリでは、公開先が未定のため次のプレースホルダーを使っています。
-
-```text
-https://github.com/YOUR_NAME/costume-studio
-```
-
-公開前に、次のファイル内の `YOUR_NAME` を自分の GitHub ユーザー名（または Organization 名）に置き換えてください。
-
-- `package.json`（`homepage` / `repository` / `bugs`）
-- `src/App.jsx`（`SOURCE_URL`。ヘルプ内の「ソースコード」とライセンスへのリンクに使われます）
-- `README.md` と `README.en.md`（この節の URL）
-
-```bash
-grep -R "YOUR_NAME" -n .
-```
+このリポジトリの公開先は `https://github.com/PixelNest256/costume-studio` です。`package.json`、`src/App.jsx`、README の URL は同じ公開先に揃えています。
 
 > 開発者向けの詳細（構成、`scratch-paint` のフォーク方法、既知の問題、検証手順）は
 > [docs/HANDOVER.md](docs/HANDOVER.md) にまとめています。
@@ -168,9 +154,17 @@ grep -R "YOUR_NAME" -n .
 - ライセンス全文: [LICENSE](LICENSE)
 - 著作権・帰属表示: [NOTICE](NOTICE)
 - 第三者ソフトウェア: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)
+- ビルド成果物の第三者ライセンス全文: `dist/THIRD_PARTY_LICENSES.txt`（`npm run build` で生成）
+- GPL-3.0 部分のライセンス: [LICENSE-GPL-3.0](LICENSE-GPL-3.0)
+- GPL 部分の改変・由来: [src/vendor/scratch-paint/MODIFICATIONS.md](src/vendor/scratch-paint/MODIFICATIONS.md)
+- 同梱フォントのライセンス: [OFL.txt](OFL.txt)
+- フォント来歴: [scratch-render-fonts-PROVENANCE.md](scratch-render-fonts-PROVENANCE.md)
+- 除外した Pixel フォントの帰属: [Grand9K-Pixel-ATTRIBUTION.md](Grand9K-Pixel-ATTRIBUTION.md)
 - 商標について: [TRADEMARK](TRADEMARK)
+- コントリビューション: [CONTRIBUTING.md](CONTRIBUTING.md)
+- セキュリティ: [SECURITY.md](SECURITY.md)
 
-AGPL に従い、改変版をネットワーク経由で利用させる場合は、実際に提供する改変版の対応ソースコードを、利用者が取得できる形で提示する必要があります。`YOUR_NAME` プレースホルダーを実際の公開先に置き換え、配信するソースがビルド内容に一致していることを確認してください。
+AGPL に従い、改変版をネットワーク経由で利用させる場合は、実際に提供する改変版の対応ソースコードを、利用者が取得できる形で提示する必要があります。対応するソースは `https://github.com/PixelNest256/costume-studio` で提供し、配信するソースがビルド内容に一致していることを確認してください。
 
 ## クレジット
 

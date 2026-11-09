@@ -35,7 +35,7 @@ import {changeFillColor} from './vendor/scratch-paint/reducers/fill-style.js';
 import {changeStrokeColor} from './vendor/scratch-paint/reducers/stroke-style.js';
 import {SAMPLE_NAME, SAMPLE_SVG} from './sample.js';
 
-const PUBLIC_REPOSITORY_URL = 'https://github.com/YOUR_NAME/costume-studio';
+const PUBLIC_REPOSITORY_URL = 'https://github.com/PixelNest256/costume-studio';
 const SOURCE_URL = PUBLIC_REPOSITORY_URL;
 const LICENSE_URL = `${PUBLIC_REPOSITORY_URL}/blob/main/LICENSE`;
 const SAMPLE_WIDTH = 300;

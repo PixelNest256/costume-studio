@@ -5,13 +5,13 @@
   "description": "A standalone, browser-based Scratch-style costume (SVG/bitmap) editor with local save and export.",
   "license": "AGPL-3.0-only",
   "author": "Costume Studio contributors",
-  "homepage": "https://github.com/YOUR_NAME/costume-studio#readme",
+  "homepage": "https://github.com/PixelNest256/costume-studio#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/YOUR_NAME/costume-studio.git"
+    "url": "git+https://github.com/PixelNest256/costume-studio.git"
   },
   "bugs": {
-    "url": "https://github.com/YOUR_NAME/costume-studio/issues"
+    "url": "https://github.com/PixelNest256/costume-studio/issues"
   },
   "keywords": [
     "scratch",
@@ -28,7 +28,7 @@
   "scripts": {
     "start": "webpack serve --mode development",
     "dev": "webpack serve --mode development",
-    "build": "webpack --mode production",
+    "build": "webpack --mode production && node scripts/prepare-legal.js",
     "preview": "npx --yes http-server dist -p 4173 -c-1"
   },
   "dependencies": {

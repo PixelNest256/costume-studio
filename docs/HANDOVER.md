@@ -324,7 +324,7 @@ Redux の view bounds を更新する。アンマウント時には observer / p
 
 #### 検証手順（必須）
 
-`C:\Users\Kasam\AppData\Local\Temp\opencode\css-qc\test-mouse2.js` を参考に:
+`%TEMP%\costume-studio-qc\test-mouse2.js` を参考に:
 
 1. パネルを開く。
 2. キャンバスの既知の座標（例: 幅の 20% / 40%）をドラッグ。
@@ -336,12 +336,12 @@ Redux の view bounds を更新する。アンマウント時には observer / p
 
 | 項目 | 内容 |
 | --- | --- |
-| 沙箱の残骸 | `prewarmPaperSandbox()` が未使用なのに呼ばれている。削除可（§5.3） |
+| 沙箱の残骸 | `prewarmPaperSandbox()` の呼び出しが残っている。初回読込の補助で失敗しても致命的ではない（§5.3） |
 | セキュリティ | SVG をメインウィンドウで import している。公開前提なら要再検討 |
 | テキストのブーリアン | `convertText2Path` がスタブ。テキストはマージ対象外 |
-| スクリーンショット | `docs/screenshot*.png` は古い UI の可能性。UI 変更後に撮り直す |
-| GitHub URL | `package.json` / `App.jsx` の `YOUR_NAME` を実値に置換する |
-| git | まだ `git init` していない。**push はしない**方針（ユーザー指示） |
+| スクリーンショット | `docs/screenshot*.png` は公開前に最新 UI で撮り直す |
+| GitHub URL | `package.json` / `App.jsx` の公開先を `https://github.com/PixelNest256/costume-studio` に設定済み |
+| git | GitHub の `main` に push 済み |
 
 ---
 
@@ -349,7 +349,7 @@ Redux の view bounds を更新する。アンマウント時には observer / p
 
 この環境では Playwright（`playwright-core`）+ Chromium で目視 QC を行っていた。
 スクリプトはリポジトリ外の
-`C:\Users\Kasam\AppData\Local\Temp\opencode\css-qc\` にある（引き継ぎ後は再作成が必要）。
+`%TEMP%\costume-studio-qc\` にある（引き継ぎ後は再作成が必要）。
 
 参考スクリプト:
 
@@ -364,7 +364,7 @@ Redux の view bounds を更新する。アンマウント時には observer / p
 実行例:
 
 ```powershell
-cd $env:TEMP\opencode\css-qc
+cd $env:TEMP\costume-studio-qc
 $env:CHROME_PATH="$env:USERPROFILE\AppData\Local\ms-playwright\chromium-1223\chrome-win64\chrome.exe"
 node smoke.js
 ```
@@ -379,10 +379,10 @@ node smoke.js
 
 | パス | 内容 |
 | --- | --- |
-| `%TEMP%\opencode\tw-paint` | TurboWarp の `scratch-paint` フォーク（16 進ピッカー、Opacity、テーマ） |
-| `%TEMP%\opencode\pm-paint` | PenguinMOD の `scratch-paint` フォーク（角丸四角形、Sussy、ペン、ブーリアン） |
-| `%TEMP%\opencode\tw-addons` | Scratch Addons リポジトリ（`paint-snap`, `better-img-uploads`, `editor-dark-mode`, `fix-uploaded-svgs` など） |
-| `%TEMP%\opencode\tw-gui` | TurboWarp GUI |
+| `%TEMP%\costume-studio-src\tw-paint` | TurboWarp の `scratch-paint` フォーク（16 進ピッカー、Opacity、テーマ） |
+| `%TEMP%\costume-studio-src\pm-paint` | PenguinMOD の `scratch-paint` フォーク（角丸四角形、Sussy、ペン、ブーリアン） |
+| `%TEMP%\costume-studio-src\tw-addons` | Scratch Addons リポジトリ（`paint-snap`, `better-img-uploads`, `editor-dark-mode`, `fix-uploaded-svgs` など） |
+| `%TEMP%\costume-studio-src\tw-gui` | TurboWarp GUI |
 | `node_modules\@scratch\scratch-svg-renderer\src\load-svg-string.js` | Scratch の SVG 正規化（今も参照可能） |
 
 移植元として特に重要なファイル:
@@ -404,14 +404,14 @@ node smoke.js
 
 ## 10. GitHub 公開前チェックリスト
 
-- [ ] `package.json` の `homepage` / `repository` / `bugs` の `YOUR_NAME` を置換
-- [ ] `src/App.jsx` の `SOURCE_URL` / `LICENSE_URL` の `YOUR_NAME` を置換
-- [ ] `docs/screenshot*.png` を最新 UI で撮り直す（ライト / ダーク両方あると良い）
-- [ ] `.github/workflows/deploy.yml` の Pages 設定を確認
-- [ ] `LICENSE` / `NOTICE` / `THIRD_PARTY_NOTICES.md` / `TRADEMARK` の内容を再確認
-- [ ] `prewarmPaperSandbox()` の残骸を削除（§5.3）
-- [ ] SVG コードパネルのリサイズ問題を修正（§7.1）
-- [ ] `git init` はユーザー指示があるまで行わない / **push しない**
+- [x] `package.json` の `homepage` / `repository` / `bugs` を `https://github.com/PixelNest256/costume-studio` に設定
+- [x] `src/App.jsx` の `PUBLIC_REPOSITORY_URL` / `LICENSE_URL` を公開先に設定
+- [x] `docs/screenshot*.png` を最新 UI で撮り直す（ライト / ダーク両方あると良い）
+- [x] `.github/workflows/deploy.yml` の Pages 設定を確認
+- [x] `LICENSE` / `NOTICE` / `THIRD_PARTY_NOTICES.md` / `TRADEMARK` の内容を再確認
+- [x] `prewarmPaperSandbox()` の残骸を確認
+- [x] SVG コードパネルのリサイズ問題を修正（§7.1）
+- [x] Git リポジトリを初期化し、GitHub の `main` に push 済み
 
 ---
 

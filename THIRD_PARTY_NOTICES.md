@@ -13,7 +13,7 @@ packages after `npm install`.
 | `@scratch/scratch-paint` (local fork: `src/vendor/scratch-paint/`) | 15.3.0 | AGPL-3.0-only | https://github.com/scratchfoundation/scratch-paint |
 | `@scratch/scratch-svg-renderer` | 15.3.0 | AGPL-3.0-only | https://github.com/scratchfoundation/scratch-svg-renderer |
 | `scratch-l10n` | 6.1.136 | AGPL-3.0-only | https://github.com/scratchfoundation/scratch-l10n |
-| `@scratch/paper` (Paper.js) | 0.11.20221201200345 | MIT | https://github.com/paperjs/paper.js |
+| `@scratch/paper` (Paper.js) | 0.11.20221201200345 | MIT | https://github.com/scratchfoundation/paper.js |
 | React / React DOM | 18.3.1 | MIT | https://github.com/facebook/react |
 | Redux / React Redux | 4.2.1 / 8.1.3 | MIT | https://github.com/reduxjs/redux |
 | `react-intl` | 6.8.9 | BSD-3-Clause | https://github.com/formatjs/formatjs |
@@ -34,6 +34,12 @@ The project is distributed under AGPL-3.0-only as a whole. See `LICENSE` and
 `NOTICE`.
 
 ## Font assets
+
+Bundled font copyrights (also recorded in [`OFL.txt`](OFL.txt)):
+
+- Noto Sans Medium — Copyright 2015 Google Inc. All Rights Reserved.
+- Source Serif Pro — Copyright 2014, 2015, 2016 Adobe Systems Incorporated.
+- Handlee — Copyright (c) 2011, Admix Designs.
 
 `scratch-render-fonts@1.0.256` is an Apache-2.0 package, but individual font
 files have separate terms. This app uses a local browser-safe subset rather than
@@ -62,6 +68,10 @@ bundling all assets from the package:
 
 The precise font provenance and metadata are recorded in
 [`scratch-render-fonts-PROVENANCE.md`](scratch-render-fonts-PROVENANCE.md).
+
+A generated `THIRD_PARTY_LICENSES.txt` is copied into the browser distribution
+(`dist/THIRD_PARTY_LICENSES.txt`) during `npm run build`; it contains the
+license texts for the installed production packages.
 Font licenses govern font software, not documents created using fonts.
 
 ## Transitive runtime dependencies
@@ -84,9 +94,12 @@ from upstream forks/add-ons. GPL-3.0 code remains subject to its original
 license when combined with AGPL-3.0 code. GPLv3 §13 permits combination with
 AGPLv3, while AGPL's network source requirement applies to the combined work.
 This project includes [`LICENSE-GPL-3.0`](LICENSE-GPL-3.0) for third-party
-GPL-3.0 code incorporated or adapted in the vendored fork. File-level origin
-notes are present where known, but are not yet a complete per-file inventory;
-review the listed upstream projects and source history when redistributing.
+GPL-3.0 code incorporated or adapted in the vendored fork. The vendored fork
+also contains a GPL-3.0 copy and a modification/provenance summary at
+[`src/vendor/scratch-paint/MODIFICATIONS.md`](src/vendor/scratch-paint/MODIFICATIONS.md).
+File-level origin notes are present where known, but are not yet a complete
+per-file inventory; review the listed upstream projects and source history when
+redistributing.
 Relevant sources:
 
 - TurboWarp `scratch-paint` (GPL-3.0):

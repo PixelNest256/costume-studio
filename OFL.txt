@@ -1,10 +1,27 @@
-Copyright (c) 2011, Marcelo Magalh�es (www.marcelomagalhaes.net | marcelommp@gmail.com | @marcelommp|), with Reserved Font Name "Londrina"
-This Font Software is licensed under the SIL Open Font License, Version 1.1.
-This license is copied below, and is also available with a FAQ at:
-http://scripts.sil.org/OFL
+Font notices for Costume Studio
+
+The following fonts are bundled in the browser build:
+
+- NotoSans-Medium.ttf
+  Copyright 2015 Google Inc. All Rights Reserved.
+  Licensed under the SIL Open Font License, Version 1.1.
+
+- SourceSerifPro-Regular.otf
+  Copyright 2014, 2015, 2016 Adobe Systems Incorporated
+  (http://www.adobe.com/), with Reserved Font Name 'Source'.
+  Licensed under the SIL Open Font License, Version 1.1.
+
+- handlee-regular.ttf
+  Copyright (c) 2011, Admix Designs (http://www.admixdesigns.com/)
+  with Reserved Font Name Handlee.
+  Licensed under the SIL Open Font License, Version 1.1.
+
+The full SIL Open Font License 1.1 follows. This is the license text used by
+the bundled font files. The upstream scratch-render-fonts package also carries
+a Londrina-specific copyright line; Londrina is not bundled here and that
+specific copyright notice does not apply to the fonts listed above.
 
 
------------------------------------------------------------
 SIL OPEN FONT LICENSE Version 1.1 - 26 February 2007
 -----------------------------------------------------------
 

@@ -34,6 +34,10 @@ const LegalNotices = ({onClose, sourceUrl, licenseUrl}) => {
                 <a href={`${sourceUrl}/blob/main/THIRD_PARTY_NOTICES.md`} rel="noopener noreferrer" target="_blank">
                     {t('legal.thirdParty', 'Third-party notices')}
                 </a>
+                {' · '}
+                <a href="THIRD_PARTY_LICENSES.txt" rel="noopener noreferrer" target="_blank">
+                    {t('legal.thirdPartyTexts', 'Third-party license texts')}
+                </a>
             </p>
             <h3>{t('legal.credits', 'Credits and references')}</h3>
             <p className="modal-message">
