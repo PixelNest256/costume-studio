@@ -139,6 +139,12 @@ const setWorkspaceBounds = clipEmpty => {
 };
 
 const clampViewBounds = () => {
+    if (getEditorSettings().infiniteCanvas) {
+        // Infinite mode should allow the wheel/middle-button viewport to move
+        // without being pulled back by the finite workspace bounds.
+        setWorkspaceBounds();
+        return;
+    }
     const {left, right, top, bottom} = paper.project.view.bounds;
     if (left < _workspaceBounds.left) {
         paper.project.view.scrollBy(new paper.Point(_workspaceBounds.left - left, 0));

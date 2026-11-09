@@ -287,11 +287,8 @@ const OUTLINE_INNER_LIGHT = '#FFFFFF';
 const OUTLINE_OUTER_LIGHT = '#4280D7';
 const OUTLINE_INNER_DARK = '#555555';
 
-const _makeStageFrame = function (bounds, isPrimary) {
+const _makeStageFrame = function (bounds, isPrimary, column, row, showLabel) {
     const frame = new paper.Group();
-    // Mark the whole group as a guide. Marking only the child rectangles
-    // leaves the group itself selectable in the paint editor.
-    setGuideItem(frame);
     if (isPrimary) {
         const whiteRect = new paper.Shape.Rectangle(bounds.expand(1));
         whiteRect.strokeWidth = 2;
@@ -315,6 +312,22 @@ const _makeStageFrame = function (bounds, isPrimary) {
         setGuideItem(rect);
         frame.addChild(rect);
     }
+    if (showLabel) {
+        const zoom = paper.view.zoom || 1;
+        const label = new paper.PointText({
+            content: `${column},${row}`,
+            fillColor: OUTLINE_OUTER_LIGHT,
+            fontSize: Math.max(2, 9 / zoom),
+            opacity: 0.55,
+            point: [bounds.left + (4 / zoom), bounds.top + (12 / zoom)]
+        });
+        label.fontFamily = 'sans-serif';
+        setGuideItem(label);
+        frame.addChild(label);
+    }
+    // Mark the whole group as a guide. Marking only the child rectangles
+    // leaves the group itself selectable in the paint editor.
+    setGuideItem(frame);
     return frame;
 };
 
@@ -323,10 +336,20 @@ const refreshStageFrames = function () {
     if (!outlineLayer) return;
     outlineLayer.removeChildren();
     const stage = getStageBounds();
+    const settings = getEditorSettings();
     for (const frameBounds of getRepeatedStageBounds()) {
-        const primary = Math.abs(frameBounds.center.x - stage.center.x) < 1e-6 &&
-            Math.abs(frameBounds.center.y - stage.center.y) < 1e-6;
-        outlineLayer.addChild(_makeStageFrame(frameBounds, primary));
+        const column = Math.round((frameBounds.center.x - stage.center.x) / stage.width);
+        // Paper's Y axis points down; the UI labels rows upward from the
+        // central stage, so a frame above the center is row 1.
+        const row = Math.round((stage.center.y - frameBounds.center.y) / stage.height);
+        const primary = column === 0 && row === 0;
+        outlineLayer.addChild(_makeStageFrame(
+            frameBounds,
+            primary,
+            column,
+            row,
+            settings.repeatStage
+        ));
     }
     outlineLayer.bringToFront();
 };

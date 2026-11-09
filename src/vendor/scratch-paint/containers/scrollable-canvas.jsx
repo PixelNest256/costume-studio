@@ -8,6 +8,7 @@ import ScrollableCanvasComponent from '../components/scrollable-canvas/scrollabl
 import {clampViewBounds, pan, zoomOnFixedPoint, getWorkspaceBounds} from '../helper/view';
 import {updateViewBounds} from '../reducers/view-bounds';
 import {redrawSelectionBox} from '../reducers/selected-items';
+import {getEditorSettings} from '../../../lib/features.js';
 
 import {getEventXY} from '../lib/touch-utils';
 import bindAll from 'lodash.bindall';
@@ -143,7 +144,7 @@ class ScrollableCanvas extends React.Component {
         }
         return (
             <ScrollableCanvasComponent
-                hideScrollbars={this.props.hideScrollbars}
+                hideScrollbars={this.props.hideScrollbars || getEditorSettings().infiniteCanvas}
                 horizontalScrollLengthPercent={widthPercent}
                 horizontalScrollStartPercent={leftPercent}
                 style={this.props.style}

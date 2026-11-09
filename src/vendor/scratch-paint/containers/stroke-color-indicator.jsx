@@ -28,7 +28,9 @@ const mapStateToProps = state => ({
     disabled: state.scratchPaint.mode === Modes.BRUSH ||
         state.scratchPaint.mode === Modes.TEXT ||
         state.scratchPaint.mode === Modes.FILL ||
-        getSelectionStrokeDisabled(),
+        getSelectionStrokeDisabled() ||
+        (!state.scratchPaint.selectedItems.length &&
+            state.scratchPaint.color.strokeColor.primary === null),
     color: state.scratchPaint.color.strokeColor.primary,
     color2: state.scratchPaint.color.strokeColor.secondary,
     fillBitmapShapes: state.scratchPaint.fillBitmapShapes,

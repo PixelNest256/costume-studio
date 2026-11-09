@@ -2175,6 +2175,11 @@ kbd {
     width: 52px;
 }
 
+.palette-inline + .palette-result-row,
+.palette-inline + .palette-actions {
+    margin-top: 10px;
+}
+
 .palette-result-row .button,
 .palette-actions .button {
     font-size: 11px;
