@@ -1,6 +1,7 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {useIntl} from 'react-intl';
 import {ChevronDownIcon, SaveIcon} from './Icons.jsx';
+import {formatShortcut} from '../lib/shortcuts.js';
 
 // Split save control: the main button performs the current costume's default
 // export, while the caret opens the full list of export formats.
@@ -61,6 +62,7 @@ const SaveMenu = ({busy, canExportPaths = true, defaultKind = 'svg', disabled, o
         <div className="save-menu" ref={wrapRef}>
             <button
                 className="button button-primary save-main"
+                data-shortcut={formatShortcut('Ctrl+S')}
                 disabled={isDisabled}
                 onClick={() => onSave(defaultKind)}
                 title={t('save.shortcut', 'Ctrl/Cmd+S')}
