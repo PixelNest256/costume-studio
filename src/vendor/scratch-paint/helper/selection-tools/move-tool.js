@@ -3,7 +3,7 @@ import Modes, {BitmapModes} from '../../lib/modes';
 import {isGroup} from '../group';
 import {isCompoundPathItem, getRootItem} from '../item';
 import {checkPointsClose, snapDeltaToAngle} from '../math';
-import {getActionBounds, CENTER, ART_BOARD_BOUNDS} from '../view';
+import {getActionBounds, CENTER, getRepeatedStageBounds} from '../view';
 import {
     clearSelection, cloneSelection, getSelectedLeafItems, getSelectedRootItems, setItemSelection
 } from '../selection';
@@ -67,28 +67,34 @@ const createSnapPoints = (selectionBounds, objects, settings) => {
         fromPoints.bottom = new paper.Point(selectionBounds.center.x, selectionBounds.bottom);
     }
     const toPoints = {};
-    if (settings.snapPageCenter) {
-        toPoints.bounds_c = {type: 'point', value: CENTER};
-    }
-    if (settings.snapPageAxes) {
-        toPoints.bounds_cx = {type: 'xcoord', value: CENTER.x};
-        toPoints.bounds_cy = {type: 'ycoord', value: CENTER.y};
-    }
-    if (settings.snapPageEdges) {
-        toPoints.bounds_l = {type: 'xcoord', value: ART_BOARD_BOUNDS.left, clamp: {min: ART_BOARD_BOUNDS.top, max: ART_BOARD_BOUNDS.bottom}};
-        toPoints.bounds_r = {type: 'xcoord', value: ART_BOARD_BOUNDS.right, clamp: {min: ART_BOARD_BOUNDS.top, max: ART_BOARD_BOUNDS.bottom}};
-        toPoints.bounds_t = {type: 'ycoord', value: ART_BOARD_BOUNDS.top, clamp: {min: ART_BOARD_BOUNDS.left, max: ART_BOARD_BOUNDS.right}};
-        toPoints.bounds_b = {type: 'ycoord', value: ART_BOARD_BOUNDS.bottom, clamp: {min: ART_BOARD_BOUNDS.left, max: ART_BOARD_BOUNDS.right}};
-        toPoints.bounds_lc = {type: 'point', value: new paper.Point(ART_BOARD_BOUNDS.left, CENTER.y)};
-        toPoints.bounds_rc = {type: 'point', value: new paper.Point(ART_BOARD_BOUNDS.right, CENTER.y)};
-        toPoints.bounds_tc = {type: 'point', value: new paper.Point(CENTER.x, ART_BOARD_BOUNDS.top)};
-        toPoints.bounds_bc = {type: 'point', value: new paper.Point(CENTER.x, ART_BOARD_BOUNDS.bottom)};
-    }
-    if (settings.snapPageCorners) {
-        toPoints.bounds_tl = {type: 'point', value: ART_BOARD_BOUNDS.topLeft};
-        toPoints.bounds_tr = {type: 'point', value: ART_BOARD_BOUNDS.topRight};
-        toPoints.bounds_bl = {type: 'point', value: ART_BOARD_BOUNDS.bottomLeft};
-        toPoints.bounds_br = {type: 'point', value: ART_BOARD_BOUNDS.bottomRight};
+    const stageBoundsList = getRepeatedStageBounds();
+    for (let stageIndex = 0; stageIndex < stageBoundsList.length; stageIndex++) {
+        const stage = stageBoundsList[stageIndex];
+        const suffix = stageIndex === 0 ? '' : `_${stageIndex}`;
+        const key = name => `${name}${suffix}`;
+        if (settings.snapPageCenter) {
+            toPoints[key('bounds_c')] = {type: 'point', value: stage.center};
+        }
+        if (settings.snapPageAxes) {
+            toPoints[key('bounds_cx')] = {type: 'xcoord', value: stage.center.x};
+            toPoints[key('bounds_cy')] = {type: 'ycoord', value: stage.center.y};
+        }
+        if (settings.snapPageEdges) {
+            toPoints[key('bounds_l')] = {type: 'xcoord', value: stage.left, clamp: {min: stage.top, max: stage.bottom}};
+            toPoints[key('bounds_r')] = {type: 'xcoord', value: stage.right, clamp: {min: stage.top, max: stage.bottom}};
+            toPoints[key('bounds_t')] = {type: 'ycoord', value: stage.top, clamp: {min: stage.left, max: stage.right}};
+            toPoints[key('bounds_b')] = {type: 'ycoord', value: stage.bottom, clamp: {min: stage.left, max: stage.right}};
+            toPoints[key('bounds_lc')] = {type: 'point', value: new paper.Point(stage.left, stage.center.y)};
+            toPoints[key('bounds_rc')] = {type: 'point', value: new paper.Point(stage.right, stage.center.y)};
+            toPoints[key('bounds_tc')] = {type: 'point', value: new paper.Point(stage.center.x, stage.top)};
+            toPoints[key('bounds_bc')] = {type: 'point', value: new paper.Point(stage.center.x, stage.bottom)};
+        }
+        if (settings.snapPageCorners) {
+            toPoints[key('bounds_tl')] = {type: 'point', value: stage.topLeft};
+            toPoints[key('bounds_tr')] = {type: 'point', value: stage.topRight};
+            toPoints[key('bounds_bl')] = {type: 'point', value: stage.bottomLeft};
+            toPoints[key('bounds_br')] = {type: 'point', value: stage.bottomRight};
+        }
     }
     for (const item of objects) {
         if (item.selected || item.data.isHelperItem || item.locked || item.guide) continue;

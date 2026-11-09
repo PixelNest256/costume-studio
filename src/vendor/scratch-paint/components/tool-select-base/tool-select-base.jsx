@@ -4,11 +4,14 @@ import PropTypes from 'prop-types';
 import {useIntl} from 'react-intl';
 
 import Button from '../button/button.jsx';
+import {TOOL_SHORTCUTS, withShortcut} from '../../../../lib/shortcuts.js';
 
 import styles from './tool-select-base.css';
 
 const ToolSelectComponent = props => {
     const intl = useIntl();
+    const label = intl.formatMessage(props.imgDescriptor);
+    const shortcut = TOOL_SHORTCUTS[props.imgDescriptor.id];
     return (
         <Button
             className={
@@ -16,13 +19,14 @@ const ToolSelectComponent = props => {
                     [styles.isSelected]: props.isSelected
                 })
             }
+            data-shortcut={shortcut}
             data-tool-id={props.toolId}
             disabled={props.disabled}
-            title={intl.formatMessage(props.imgDescriptor)}
+            title={withShortcut(label, shortcut)}
             onClick={props.onMouseDown}
         >
             <img
-                alt={intl.formatMessage(props.imgDescriptor)}
+                alt={label}
                 className={styles.toolSelectIcon}
                 draggable={false}
                 src={props.imgSrc}

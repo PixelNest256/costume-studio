@@ -11,7 +11,11 @@ const SHORTCUTS = [
     ['help.shortcut.clipboard', 'Ctrl / ⌘ + C / V / X'],
     ['help.shortcut.selectAll', 'Ctrl / ⌘ + A'],
     ['help.shortcut.delete', 'Delete / Backspace'],
-    ['help.shortcut.nudge', 'Arrow keys'],
+    ['help.shortcut.nudge', 'Arrow keys / Shift + Arrow keys'],
+    ['help.shortcut.layer', 'Ctrl / ⌘ + ↑ / ↓  ·  Ctrl / ⌘ + Shift + ↑ / ↓'],
+    ['help.shortcut.group', 'Ctrl / ⌘ + G  ·  Ctrl / ⌘ + Shift + G'],
+    ['help.shortcut.flip', 'Shift + H / Shift + V'],
+    ['help.shortcut.cycle', 'Tab / Shift + Tab'],
     ['help.shortcut.tools', 'S / A / B / E / F / T / L / C / R / P / Y / V / M'],
     ['help.shortcut.help', '?']
 ];
@@ -27,6 +31,7 @@ const HelpDialog = ({sourceUrl, licenseUrl, onClose, onOpenSample}) => {
         ['help.feature.export', DownloadIcon],
         ['help.feature.preciseTransform', SaveIcon],
         ['help.feature.fonts', SaveIcon],
+        ['help.feature.workspace', SaveIcon],
         ['help.feature.autosave', SaveIcon]
     ];
 

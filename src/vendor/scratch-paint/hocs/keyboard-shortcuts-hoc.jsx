@@ -7,8 +7,10 @@ import {connect} from 'react-redux';
 import CopyPasteHOC from './copy-paste-hoc.jsx';
 
 import {selectAllBitmap} from '../helper/bitmap';
-import {clearSelection, deleteSelection, getSelectedLeafItems,
-    selectAllItems, selectAllSegments, getSelectedRootItems} from '../helper/selection';
+import {bringForward, bringToFront, sendBackward, sendToBack} from '../helper/order';
+import {flipSelection} from '../helper/flip';
+import {clearSelection, deleteSelection, getAllSelectableRootItems, getSelectedLeafItems,
+    selectAllItems, selectAllSegments, getSelectedRootItems, setItemSelection} from '../helper/selection';
 import {groupSelection, shouldShowGroup, ungroupSelection, shouldShowUngroup} from '../helper/group';
 import {clearSelectedItems, setSelectedItems} from '../reducers/selected-items';
 import {changeMode} from '../reducers/modes';
@@ -52,11 +54,69 @@ const KeyboardShortcutsHOC = function (WrappedComponent) {
             bindAll(this, [
                 'handleKeyPress',
                 'changeToASelectMode',
-                'selectAll'
+                'selectAll',
+                'selectInHistory'
             ]);
+            // The most recent selections, oldest first. Tab follows this order
+            // so the user can step back through objects they just selected.
+            this._selectionHistory = [];
+            this._lastSelectionSignature = '';
+            this._cycleTargetSignature = null;
+        }
+        componentDidMount () {
+            this.syncSelectionHistory(true);
+        }
+        componentDidUpdate () {
+            this.syncSelectionHistory();
+        }
+        getSelectionSignature (items) {
+            return items.map(item => item.id).join(',');
+        }
+        recordSelection (item) {
+            if (!item) return;
+            this._selectionHistory = this._selectionHistory.filter(id => id !== item.id);
+            this._selectionHistory.push(item.id);
+            if (this._selectionHistory.length > 50) this._selectionHistory.shift();
+        }
+        syncSelectionHistory (initial) {
+            const items = getSelectedRootItems();
+            const signature = this.getSelectionSignature(items);
+            if (!initial && signature === this._lastSelectionSignature) return;
+            this._lastSelectionSignature = signature;
+            if (signature === this._cycleTargetSignature) {
+                this._cycleTargetSignature = null;
+                return;
+            }
+            for (const item of items) this.recordSelection(item);
+        }
+        selectInHistory (direction) {
+            const allItems = getAllSelectableRootItems();
+            if (!allItems.length) return;
+            const byId = new Map(allItems.map(item => [item.id, item]));
+            let ordered = this._selectionHistory
+                .map(id => byId.get(id))
+                .filter(Boolean);
+            if (ordered.length < 2) ordered = allItems;
+            if (ordered.length < 2) {
+                if (ordered.length === 1) {
+                    clearSelection(this.props.clearSelectedItems);
+                    setItemSelection(ordered[0], true);
+                    this.props.setSelectedItems(this.props.format);
+                }
+                return;
+            }
+            const current = getSelectedRootItems()[0];
+            let index = current ? ordered.findIndex(item => item.id === current.id) : -1;
+            if (index < 0) index = direction < 0 ? 0 : ordered.length - 1;
+            const target = ordered[(index + direction + ordered.length) % ordered.length];
+            clearSelection(this.props.clearSelectedItems);
+            setItemSelection(target, true);
+            this._cycleTargetSignature = this.getSelectionSignature([target]);
+            this.props.setSelectedItems(this.props.format);
         }
         handleKeyPress (event) {
             if (event.target instanceof HTMLInputElement ||
+                event.target instanceof HTMLTextAreaElement ||
                 event.target.isContentEditable ||
                 (event.target.closest && event.target.closest('.cm-content, .svg-code-editor'))) {
                 // Ignore keyboard shortcuts if a text input field or the
@@ -66,6 +126,12 @@ const KeyboardShortcutsHOC = function (WrappedComponent) {
             }
             // Don't activate keyboard shortcuts during text editing
             if (this.props.textEditing) return;
+
+            if (event.key === 'Tab' && !event.altKey && !event.ctrlKey && !event.metaKey) {
+                event.preventDefault();
+                this.selectInHistory(event.shiftKey ? 1 : -1);
+                return;
+            }
 
             if (event.key === 'Escape') {
                 event.preventDefault();
@@ -83,6 +149,16 @@ const KeyboardShortcutsHOC = function (WrappedComponent) {
                 } else if (key === 'z') {
                     event.preventDefault();
                     this.props.onUndo();
+                } else if (key === 'arrowup' || key === 'arrowdown') {
+                    event.preventDefault();
+                    if (key === 'arrowup') {
+                        if (event.shiftKey) bringToFront(this.props.onUpdateImage);
+                        else bringForward(this.props.onUpdateImage);
+                    } else if (event.shiftKey) {
+                        sendToBack(this.props.onUpdateImage);
+                    } else {
+                        sendBackward(this.props.onUpdateImage);
+                    }
                 } else if (event.shiftKey && key === 'g') {
                     if (shouldShowUngroup()) {
                         ungroupSelection(clearSelectedItems, setSelectedItems, this.props.onUpdateImage);
@@ -113,6 +189,14 @@ const KeyboardShortcutsHOC = function (WrappedComponent) {
                     this.changeToASelectMode();
                     event.preventDefault();
                     this.selectAll();
+                }
+            } else if (!event.ctrlKey && !event.metaKey && !event.altKey && event.shiftKey) {
+                if (event.key.toLowerCase() === 'h') {
+                    event.preventDefault();
+                    flipSelection(true, isBitmap(this.props.format), this.props.onUpdateImage);
+                } else if (event.key.toLowerCase() === 'v') {
+                    event.preventDefault();
+                    flipSelection(false, isBitmap(this.props.format), this.props.onUpdateImage);
                 }
             } else if (!event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey) {
                 // Single-letter tool shortcuts used by this app.
@@ -176,6 +260,7 @@ const KeyboardShortcutsHOC = function (WrappedComponent) {
         onRedo: PropTypes.func.isRequired,
         onUndo: PropTypes.func.isRequired,
         onUpdateImage: PropTypes.func.isRequired,
+        selectedItems: PropTypes.array,
         setSelectedItems: PropTypes.func.isRequired,
         textEditing: PropTypes.bool.isRequired
     };
@@ -183,6 +268,7 @@ const KeyboardShortcutsHOC = function (WrappedComponent) {
     const mapStateToProps = state => ({
         mode: state.scratchPaint.mode,
         format: state.scratchPaint.format,
+        selectedItems: state.scratchPaint.selectedItems,
         textEditing: state.scratchPaint.textEditTarget !== null
     });
     const mapDispatchToProps = dispatch => ({

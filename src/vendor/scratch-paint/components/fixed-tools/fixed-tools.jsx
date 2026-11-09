@@ -19,6 +19,7 @@ import Label from '../forms/label.jsx';
 import LabeledIconButton from '../labeled-icon-button/labeled-icon-button.jsx';
 import layout from '../../lib/layout-constants';
 import {hideLabel} from '../../lib/hide-label';
+import {formatShortcut, withShortcut} from '../../../../lib/shortcuts.js';
 import styles from './fixed-tools.css';
 
 import cropIcon from './icons/crop.svg';
@@ -115,12 +116,14 @@ const FixedToolsComponent = props => {
     const showForward = isVector(props.format) && toolbarWidth >= 750;
     const showFront = isVector(props.format) && toolbarWidth >= 880;
     const overflowItems = [];
-    const makeMenuItem = (key, title, icon, disabled, onClick) => (
+    const makeMenuItem = (key, title, icon, disabled, onClick, shortcut) => (
         <Button
             className={classNames(styles.modMenuItem, {[styles.modDisabled]: disabled})}
+            data-shortcut={shortcut}
             disabled={disabled}
             key={key}
             onClick={onClick}
+            title={withShortcut(title, shortcut)}
         >
             <img className={styles.menuItemIcon} draggable={false} src={icon}/>
             <span>{title}</span>
@@ -130,16 +133,16 @@ const FixedToolsComponent = props => {
         overflowItems.push(makeMenuItem('crop', intl.formatMessage(messages.crop), cropIcon, false, props.onCrop));
     }
     if (isVector(props.format) && !showGroup) {
-        overflowItems.push(makeMenuItem('group', intl.formatMessage(messages.group), groupIcon, !shouldShowGroup(), props.onGroup));
-        overflowItems.push(makeMenuItem('ungroup', intl.formatMessage(messages.ungroup), ungroupIcon, !shouldShowUngroup(), props.onUngroup));
+        overflowItems.push(makeMenuItem('group', intl.formatMessage(messages.group), groupIcon, !shouldShowGroup(), props.onGroup, 'Ctrl+G'));
+        overflowItems.push(makeMenuItem('ungroup', intl.formatMessage(messages.ungroup), ungroupIcon, !shouldShowUngroup(), props.onUngroup, 'Ctrl+Shift+G'));
     }
     if (isVector(props.format) && !showForward) {
-        overflowItems.push(makeMenuItem('forward', intl.formatMessage(messages.forward), sendForwardIcon, !shouldShowBringForward(), props.onSendForward));
-        overflowItems.push(makeMenuItem('backward', intl.formatMessage(messages.backward), sendBackwardIcon, !shouldShowSendBackward(), props.onSendBackward));
+        overflowItems.push(makeMenuItem('forward', intl.formatMessage(messages.forward), sendForwardIcon, !shouldShowBringForward(), props.onSendForward, 'Ctrl+ArrowUp'));
+        overflowItems.push(makeMenuItem('backward', intl.formatMessage(messages.backward), sendBackwardIcon, !shouldShowSendBackward(), props.onSendBackward, 'Ctrl+ArrowDown'));
     }
     if (isVector(props.format) && !showFront) {
-        overflowItems.push(makeMenuItem('front', intl.formatMessage(messages.front), sendFrontIcon, !shouldShowBringForward(), props.onSendToFront));
-        overflowItems.push(makeMenuItem('back', intl.formatMessage(messages.back), sendBackIcon, !shouldShowSendBackward(), props.onSendToBack));
+        overflowItems.push(makeMenuItem('front', intl.formatMessage(messages.front), sendFrontIcon, !shouldShowBringForward(), props.onSendToFront, 'Ctrl+Shift+ArrowUp'));
+        overflowItems.push(makeMenuItem('back', intl.formatMessage(messages.back), sendBackIcon, !shouldShowSendBackward(), props.onSendToBack, 'Ctrl+Shift+ArrowDown'));
     }
 
     return (
@@ -178,7 +181,9 @@ const FixedToolsComponent = props => {
                                 }
                             )
                         }
+                        data-shortcut={formatShortcut('Ctrl+Z')}
                         disabled={undoDisabled}
+                        title={withShortcut(intl.formatMessage(messages.undo), 'Ctrl+Z')}
                         onClick={props.onUndo}
                     >
                         <img
@@ -200,7 +205,9 @@ const FixedToolsComponent = props => {
                                 }
                             )
                         }
+                        data-shortcut={formatShortcut('Ctrl+Shift+Z')}
                         disabled={redoDisabled}
+                        title={withShortcut(intl.formatMessage(messages.redo), 'Ctrl+Shift+Z')}
                         onClick={props.onRedo}
                     >
                         <img
@@ -232,6 +239,7 @@ const FixedToolsComponent = props => {
                         disabled={!shouldShowGroup()}
                         hideLabel={hideLabel(intl.locale)}
                         imgSrc={groupIcon}
+                        shortcut="Ctrl+G"
                         title={intl.formatMessage(messages.group)}
                         onClick={props.onGroup}
                     />
@@ -239,6 +247,7 @@ const FixedToolsComponent = props => {
                         disabled={!shouldShowUngroup()}
                         hideLabel={hideLabel(intl.locale)}
                         imgSrc={ungroupIcon}
+                        shortcut="Ctrl+Shift+G"
                         title={intl.formatMessage(messages.ungroup)}
                         onClick={props.onUngroup}
                     />
@@ -252,6 +261,7 @@ const FixedToolsComponent = props => {
                         disabled={!shouldShowBringForward()}
                         hideLabel={hideLabel(intl.locale)}
                         imgSrc={sendForwardIcon}
+                        shortcut="Ctrl+ArrowUp"
                         title={intl.formatMessage(messages.forward)}
                         onClick={props.onSendForward}
                     />
@@ -259,6 +269,7 @@ const FixedToolsComponent = props => {
                         disabled={!shouldShowSendBackward()}
                         hideLabel={hideLabel(intl.locale)}
                         imgSrc={sendBackwardIcon}
+                        shortcut="Ctrl+ArrowDown"
                         title={intl.formatMessage(messages.backward)}
                         onClick={props.onSendBackward}
                     />
@@ -271,6 +282,7 @@ const FixedToolsComponent = props => {
                         disabled={!shouldShowBringForward()}
                         hideLabel={hideLabel(intl.locale)}
                         imgSrc={sendFrontIcon}
+                        shortcut="Ctrl+Shift+ArrowUp"
                         title={intl.formatMessage(messages.front)}
                         onClick={props.onSendToFront}
                     />
@@ -278,6 +290,7 @@ const FixedToolsComponent = props => {
                         disabled={!shouldShowSendBackward()}
                         hideLabel={hideLabel(intl.locale)}
                         imgSrc={sendBackIcon}
+                        shortcut="Ctrl+Shift+ArrowDown"
                         title={intl.formatMessage(messages.back)}
                         onClick={props.onSendToBack}
                     />

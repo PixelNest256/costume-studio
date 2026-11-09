@@ -205,7 +205,6 @@ class ModeTools extends React.Component {
         const selectedItems = getSelectedLeafItems();
         for (const item of selectedItems) {
             const styles = item.getStyle();
-            console.log(styles.getStrokeCap())
             if (styles.getStrokeCap() === 'round') {
                 styles.setStrokeCap('butt');
                 changed = true;

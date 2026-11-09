@@ -14,6 +14,7 @@ import ColorPickerComponent from '../components/color-picker/color-picker.jsx';
 import {MIXED} from '../helper/style-path';
 import Modes from '../lib/modes';
 import {colorToHex, makeAlphaComponent} from '../lib/tw-color-utils';
+import {addColorHistory, getColorHistory} from '../../../lib/color-history.js';
 
 const colorStringToHsv = hexString => {
     let hsv;
@@ -61,7 +62,9 @@ class ColorPicker extends React.Component {
             'handleAlphaChange',
             'handleHexColorChange',
             'handleTransparent',
-            'handleActivateEyeDropper'
+            'handleActivateEyeDropper',
+            'handleSaturationBrightnessChange',
+            'handleHistorySelect'
         ]);
 
         const color = props.colorIndex === 0 ? props.color : props.color2;
@@ -70,7 +73,8 @@ class ColorPicker extends React.Component {
             hue: hsv[0],
             saturation: hsv[1],
             brightness: hsv[2],
-            alpha: hsv[3]
+            alpha: hsv[3],
+            history: getColorHistory()
         };
     }
     componentWillReceiveProps (newProps) {
@@ -119,12 +123,23 @@ class ColorPicker extends React.Component {
         });
     }
     handleColorChange () {
-        this.props.onChangeColor(hsvToHex(
+        const color = hsvToHex(
             this.state.hue,
             this.state.saturation,
             this.state.brightness,
             this.state.alpha
-        ));
+        );
+        this.props.onChangeColor(color);
+        this.setState({history: addColorHistory(color)});
+    }
+    handleSaturationBrightnessChange (saturation, brightness) {
+        this.ensureNonZeroAlpha();
+        this.setState({saturation: saturation, brightness: brightness}, () => {
+            this.handleColorChange();
+        });
+    }
+    handleHistorySelect (color) {
+        this.handleHexColorChange(color);
     }
     handleAlphaChange (alpha) {
         this.setState({alpha: alpha / 100}, () => {
@@ -154,6 +169,7 @@ class ColorPicker extends React.Component {
             alpha: hsv[3]
         });
         this.props.onChangeColor(color);
+        this.setState({history: addColorHistory(color)});
     }
     handleTransparent () {
         this.props.onChangeColor(null);
@@ -202,6 +218,9 @@ class ColorPicker extends React.Component {
                 onChangeGradientTypeVertical={this.handleChangeGradientTypeVertical}
                 onHueChange={this.handleHueChange}
                 onSaturationChange={this.handleSaturationChange}
+                onSaturationBrightnessChange={this.handleSaturationBrightnessChange}
+                history={this.state.history}
+                onHistorySelect={this.handleHistorySelect}
                 onSelectColor={this.props.onSelectColor}
                 onSelectColor2={this.props.onSelectColor2}
                 onSwap={this.props.onSwap}

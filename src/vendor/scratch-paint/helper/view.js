@@ -3,6 +3,7 @@ import {CROSSHAIR_SIZE, getBackgroundGuideLayer, getDragCrosshairLayer, getRaste
 import {getAllRootItems, getSelectedRootItems} from './selection';
 import {getHitBounds} from './bitmap';
 import log from '../log/log';
+import {getEditorSettings} from '../../../lib/features.js';
 
 // Vectors are imported and exported at SVG_ART_BOARD size.
 // Once they are imported however, both SVGs and bitmaps are on
@@ -25,6 +26,65 @@ const MAX_WORKSPACE_BOUNDS = new paper.Rectangle(
     -ART_BOARD_HEIGHT / 4,
     ART_BOARD_WIDTH * 1.5,
     ART_BOARD_HEIGHT * 1.5);
+
+const getStageBounds = () => {
+    const settings = getEditorSettings();
+    if (!settings.customStage) return ART_BOARD_BOUNDS;
+    const width = Math.max(1, settings.stageWidth * 2);
+    const height = Math.max(1, settings.stageHeight * 2);
+    return new paper.Rectangle(
+        CENTER.x - (width / 2),
+        CENTER.y - (height / 2),
+        width,
+        height);
+};
+
+const getMaxWorkspaceBounds = () => {
+    const stage = getStageBounds();
+    const width = Math.max(MAX_WORKSPACE_BOUNDS.width, stage.width * 1.5);
+    const height = Math.max(MAX_WORKSPACE_BOUNDS.height, stage.height * 1.5);
+    return new paper.Rectangle(
+        CENTER.x - (width / 2),
+        CENTER.y - (height / 2),
+        width,
+        height);
+};
+
+const getWorkspaceLimit = () => (
+    getEditorSettings().infiniteCanvas ?
+        new paper.Rectangle(-1000000, -1000000, 2000000, 2000000) :
+        getMaxWorkspaceBounds()
+);
+
+const getRepeatedStageBounds = () => {
+    const stage = getStageBounds();
+    const settings = getEditorSettings();
+    if (!settings.repeatStage) return [stage];
+    const view = paper.view.bounds;
+    const padding = 2;
+    const firstColumn = Math.floor((view.left - stage.left) / stage.width) - padding;
+    const lastColumn = Math.ceil((view.right - stage.left) / stage.width) + padding;
+    const firstRow = Math.floor((view.top - stage.top) / stage.height) - padding;
+    const lastRow = Math.ceil((view.bottom - stage.top) / stage.height) + padding;
+    const result = [];
+    for (let row = firstRow; row <= lastRow; row++) {
+        for (let column = firstColumn; column <= lastColumn; column++) {
+            if (Math.abs(row) > 30 || Math.abs(column) > 30) continue;
+            result.push(new paper.Rectangle(
+                stage.x + (column * stage.width),
+                stage.y + (row * stage.height),
+                stage.width,
+                stage.height));
+        }
+    }
+    return result.length ? result : [stage];
+};
+
+const notifyViewChanged = () => {
+    if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('costume-studio:view-changed'));
+    }
+};
 
 let _workspaceBounds = ART_BOARD_BOUNDS;
 
@@ -51,8 +111,10 @@ const setWorkspaceBounds = clipEmpty => {
     for (const item of items) {
         bounds = bounds.unite(item.bounds.expand(BUFFER));
     }
-    // Limit to max workspace bounds
-    bounds = bounds.intersect(MAX_WORKSPACE_BOUNDS.expand(BUFFER));
+    // Limit to the workspace unless the infinite-canvas option is enabled.
+    if (!getEditorSettings().infiniteCanvas) {
+        bounds = bounds.intersect(getMaxWorkspaceBounds().expand(BUFFER));
+    }
     let top = bounds.top;
     let left = bounds.left;
     let bottom = bounds.bottom;
@@ -73,6 +135,7 @@ const setWorkspaceBounds = clipEmpty => {
     }
 
     _workspaceBounds = new paper.Rectangle(left, top, right - left, bottom - top);
+    notifyViewChanged();
 };
 
 const clampViewBounds = () => {
@@ -162,7 +225,9 @@ const getActionBounds = isBitmap => {
     if (isBitmap) {
         return ART_BOARD_BOUNDS;
     }
-    return paper.view.bounds.unite(ART_BOARD_BOUNDS).intersect(MAX_WORKSPACE_BOUNDS);
+    const stage = getStageBounds();
+    const bounds = paper.view.bounds.unite(stage);
+    return getEditorSettings().infiniteCanvas ? bounds : bounds.intersect(getMaxWorkspaceBounds());
 };
 
 const zoomToFit = isBitmap => {
@@ -203,6 +268,10 @@ const zoomToFit = isBitmap => {
 export {
     ART_BOARD_BOUNDS,
     ART_BOARD_HEIGHT,
+    getStageBounds,
+    getMaxWorkspaceBounds,
+    getWorkspaceLimit,
+    getRepeatedStageBounds,
     ART_BOARD_WIDTH,
     CENTER,
     OUTERMOST_ZOOM_LEVEL,

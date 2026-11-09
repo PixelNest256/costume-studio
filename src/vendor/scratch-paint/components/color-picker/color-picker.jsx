@@ -42,6 +42,35 @@ const messages = defineMessages({
     }
 });
 class ColorPickerComponent extends React.Component {
+    constructor (props) {
+        super(props);
+        this.svRef = React.createRef();
+        this.handleSvPointerDown = this.handleSvPointerDown.bind(this);
+        this.handleSvPointerMove = this.handleSvPointerMove.bind(this);
+        this.handleSvPointerUp = this.handleSvPointerUp.bind(this);
+    }
+    _updateSv (event) {
+        const element = this.svRef.current;
+        if (!element) return;
+        const rect = element.getBoundingClientRect();
+        const saturation = Math.max(0, Math.min(100, ((event.clientX - rect.left) / rect.width) * 100));
+        const brightness = Math.max(0, Math.min(100, (1 - ((event.clientY - rect.top) / rect.height)) * 100));
+        this.props.onSaturationBrightnessChange(saturation, brightness);
+    }
+    handleSvPointerDown (event) {
+        event.preventDefault();
+        event.currentTarget.setPointerCapture(event.pointerId);
+        this._updateSv(event);
+    }
+    handleSvPointerMove (event) {
+        if (!event.currentTarget.hasPointerCapture(event.pointerId)) return;
+        this._updateSv(event);
+    }
+    handleSvPointerUp (event) {
+        if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+            event.currentTarget.releasePointerCapture(event.pointerId);
+        }
+    }
     _makeBackground (channel) {
         const stops = [];
         // Generate the color slider background CSS gradients by adding
@@ -88,6 +117,34 @@ class ColorPickerComponent extends React.Component {
                 className={styles.colorPickerContainer}
                 dir={this.props.rtl ? 'rtl' : 'ltr'}
             >
+                <div
+                    aria-label={this.props.intl.formatMessage({
+                        id: 'paint.paintEditor.saturationBrightness',
+                        defaultMessage: 'Saturation and brightness'
+                    })}
+                    className={styles.svPicker}
+                    onPointerDown={this.handleSvPointerDown}
+                    onPointerMove={this.handleSvPointerMove}
+                    onPointerUp={this.handleSvPointerUp}
+                    ref={this.svRef}
+                    role="slider"
+                    style={{
+                        background: `linear-gradient(to top, #000, transparent), linear-gradient(to right, #fff, hsl(${this.props.hue * 3.6}, 100%, 50%))`
+                    }}
+                    tabIndex={0}
+                    title={this.props.intl.formatMessage({
+                        id: 'paint.paintEditor.saturationBrightness',
+                        defaultMessage: 'Saturation and brightness'
+                    })}
+                >
+                    <span
+                        className={styles.svMarker}
+                        style={{
+                            left: `${this.props.saturation}%`,
+                            top: `${100 - this.props.brightness}%`
+                        }}
+                    />
+                </div>
                 {this.props.shouldShowGradientTools ? (
                     <div>
                         <div className={styles.row}>
@@ -359,6 +416,27 @@ class ColorPickerComponent extends React.Component {
                         </div>
                     </div>
                 </div>
+                <div className={styles.historyRow}>
+                    <span className={styles.historyLabel}>
+                        {this.props.intl.formatMessage({
+                            id: 'paint.paintEditor.colorHistory',
+                            defaultMessage: 'Recent colors'
+                        })}
+                    </span>
+                    <div className={styles.historySwatches}>
+                        {this.props.history.map(color => (
+                            <button
+                                aria-label={color}
+                                className={styles.historySwatch}
+                                key={color}
+                                onClick={() => this.props.onHistorySelect(color)}
+                                style={{backgroundColor: color}}
+                                title={color}
+                                type="button"
+                            />
+                        ))}
+                    </div>
+                </div>
             </div>
         );
     }
@@ -386,6 +464,9 @@ ColorPickerComponent.propTypes = {
     onChangeGradientTypeVertical: PropTypes.func.isRequired,
     onHueChange: PropTypes.func.isRequired,
     onSaturationChange: PropTypes.func.isRequired,
+    onSaturationBrightnessChange: PropTypes.func.isRequired,
+    history: PropTypes.array.isRequired,
+    onHistorySelect: PropTypes.func.isRequired,
     onSelectColor: PropTypes.func.isRequired,
     onSelectColor2: PropTypes.func.isRequired,
     onSwap: PropTypes.func,

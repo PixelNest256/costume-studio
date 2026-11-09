@@ -11,10 +11,11 @@ import {stripInvalidPaperData} from '../helper/strip-invalid-paper-data';
 import {performSnapshot} from '../helper/undo';
 import {undoSnapshot, clearUndoState} from '../reducers/undo';
 import {isGroup, ungroupItems} from '../helper/group';
-import {clearRaster, convertBackgroundGuideLayer, getRaster, setupLayers, updateTheme} from '../helper/layer';
+import {applyWorkspaceSettings, clearRaster, convertBackgroundGuideLayer, getRaster, refreshStageFrames, setupLayers, updateTheme} from '../helper/layer';
+import {getEditorSettings} from '../../../lib/features.js';
 import {clearSelectedItems} from '../reducers/selected-items';
 import {
-    ART_BOARD_WIDTH, ART_BOARD_HEIGHT, CENTER, MAX_WORKSPACE_BOUNDS,
+    ART_BOARD_WIDTH, ART_BOARD_HEIGHT, CENTER, MAX_WORKSPACE_BOUNDS, getWorkspaceLimit,
     clampViewBounds, resetZoom, setWorkspaceBounds, zoomToFit, resizeCrosshair
 } from '../helper/view';
 import {ensureClockwise, scaleWithStrokes} from '../helper/math';
@@ -32,12 +33,16 @@ class PaperCanvas extends React.Component {
         bindAll(this, [
             'clearQueuedImport',
             'setCanvas',
+            'setBackdrop',
             'importSvg',
             'initializeSvg',
             'maybeZoomToFit',
             'switchCostume',
             'onViewResize',
-            'recalibrateSize'
+            'recalibrateSize',
+            'refreshBackdrop',
+            'handleFeaturesChanged',
+            'handleViewChanged'
         ]);
         this._importGeneration = 0;
         this._isMounted = false;
@@ -52,6 +57,8 @@ class PaperCanvas extends React.Component {
             this._resizeObserver.observe(this.canvas);
         }
         paper.view.on('resize', this.onViewResize);
+        window.addEventListener('costume-studio:features-changed', this.handleFeaturesChanged);
+        window.addEventListener('costume-studio:view-changed', this.handleViewChanged);
         resetZoom();
         if (this.props.zoomLevelId) {
             this.props.setZoomLevelId(this.props.zoomLevelId);
@@ -77,6 +84,7 @@ class PaperCanvas extends React.Component {
         updateTheme(this.props.theme);
         this.importImage(
             this.props.imageFormat, this.props.image, this.props.rotationCenterX, this.props.rotationCenterY);
+        this.refreshBackdrop();
     }
     componentWillReceiveProps (newProps) {
         if (this.props.imageId !== newProps.imageId) {
@@ -87,9 +95,11 @@ class PaperCanvas extends React.Component {
         if (this.props.format !== newProps.format) {
             this.recalibrateSize();
             convertBackgroundGuideLayer(newProps.format);
+            applyWorkspaceSettings(newProps.format);
         }
         if (this.props.theme !== newProps.theme) {
             updateTheme(newProps.theme);
+            this.refreshBackdrop(newProps.theme);
         }
     }
     componentWillUnmount () {
@@ -102,6 +112,8 @@ class PaperCanvas extends React.Component {
             window.cancelAnimationFrame(this._resizeFrame);
             this._resizeFrame = null;
         }
+        window.removeEventListener('costume-studio:features-changed', this.handleFeaturesChanged);
+        window.removeEventListener('costume-studio:view-changed', this.handleViewChanged);
         this.clearQueuedImport();
         // shouldZoomToFit means the zoom level hasn't been initialized yet
         if (!this.shouldZoomToFit) {
@@ -366,8 +378,9 @@ class PaperCanvas extends React.Component {
         mask.locked = true;
         mask.matrix = new paper.Matrix(); // Identity
         // Set the artwork to get clipped at the max costume size
-        mask.size.height = MAX_WORKSPACE_BOUNDS.height;
-        mask.size.width = MAX_WORKSPACE_BOUNDS.width;
+        const workspaceLimit = getWorkspaceLimit();
+        mask.size.height = workspaceLimit.height;
+        mask.size.width = workspaceLimit.width;
         mask.setPosition(CENTER);
         paper.project.activeLayer.addChild(mask);
         mask.clipMask = true;
@@ -442,20 +455,72 @@ class PaperCanvas extends React.Component {
             if (callback) callback();
         }, 0);
     }
+    refreshBackdrop (theme = this.props.theme) {
+        if (!this.canvas || !this.backdrop) return;
+        const settings = getEditorSettings();
+        const canvas = this.canvas;
+        const backdrop = this.backdrop;
+        if (!settings.infiniteCanvas) {
+            backdrop.style.background = '';
+            canvas.style.backgroundColor = '';
+            canvas.style.backgroundImage = '';
+            canvas.style.backgroundSize = '';
+            canvas.style.backgroundPosition = '';
+            return;
+        }
+        const dark = theme === 'dark';
+        const tile = dark ? '#222222' : '#d9e3f2';
+        const base = dark ? '#111111' : '#ffffff';
+        const size = Math.max(4, 16 * paper.view.zoom);
+        const left = -paper.view.bounds.left * paper.view.zoom;
+        const top = -paper.view.bounds.top * paper.view.zoom;
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16">` +
+            `<rect width="16" height="16" fill="${base}"/>` +
+            `<rect width="8" height="8" fill="${tile}"/>` +
+            `<rect x="8" y="8" width="8" height="8" fill="${tile}"/></svg>`;
+        canvas.style.backgroundColor = 'transparent';
+        canvas.style.backgroundImage = 'none';
+        canvas.style.backgroundSize = '';
+        canvas.style.backgroundPosition = '';
+        backdrop.style.backgroundColor = base;
+        backdrop.style.backgroundImage = `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+        backdrop.style.backgroundSize = `${size}px ${size}px`;
+        backdrop.style.backgroundPosition = `${left}px ${top}px`;
+    }
+    handleFeaturesChanged () {
+        if (!this._isMounted || !paper.view) return;
+        applyWorkspaceSettings(this.props.format);
+        setWorkspaceBounds(true);
+        clampViewBounds();
+        this.refreshBackdrop();
+        this.props.updateViewBounds(paper.view.matrix);
+    }
+    handleViewChanged () {
+        if (!this._isMounted || !paper.view) return;
+        refreshStageFrames();
+        this.refreshBackdrop();
+    }
+    setBackdrop (element) {
+        this.backdrop = element;
+        this.refreshBackdrop();
+    }
     setCanvas (canvas) {
         this.canvas = canvas;
         if (this.props.canvasRef) {
             this.props.canvasRef(canvas);
         }
+        this.refreshBackdrop();
     }
     render () {
         return (
-            <canvas
-                className={styles.paperCanvas}
-                ref={this.setCanvas}
-                style={{cursor: this.props.cursor}}
-                resize="true"
-            />
+            <div className={styles.canvasBackdrop} ref={this.setBackdrop}>
+                <canvas
+                    className={styles.paperCanvas}
+                    ref={this.setCanvas}
+                    style={{cursor: this.props.cursor}}
+                    resize="true"
+                />
+            </div>
         );
     }
 }

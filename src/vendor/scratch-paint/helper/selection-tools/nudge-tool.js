@@ -2,6 +2,7 @@ import paper from '@scratch/paper';
 import {getSelectedRootItems} from '../selection';
 import {getActionBounds} from '../view';
 import {BitmapModes} from '../../lib/modes';
+import {getNudgeSettings} from '../../../../lib/features.js';
 
 const NUDGE_MORE_MULTIPLIER = 15;
 
@@ -25,9 +26,19 @@ class NudgeTool {
             // Ignore nudge if a text input field is focused
             return;
         }
+        const nativeEvent = event.event || {};
+        if (event.modifiers.control || event.modifiers.meta || event.modifiers.alt ||
+            nativeEvent.ctrlKey || nativeEvent.metaKey || nativeEvent.altKey) {
+            // Ctrl/Cmd+Arrow is reserved for layer ordering, and Alt is used
+            // by browser/OS shortcuts; do not also nudge the selection.
+            return;
+        }
 
-        let nudgeAmount = 1 / paper.view.zoom;
-        if (event.modifiers.shift) nudgeAmount *= NUDGE_MORE_MULTIPLIER;
+        const settings = getNudgeSettings();
+        let nudgeAmount = settings.fixed ? settings.normal : 1 / paper.view.zoom;
+        if (event.modifiers.shift) {
+            nudgeAmount = settings.fixed ? settings.shift : nudgeAmount * NUDGE_MORE_MULTIPLIER;
+        }
 
         const selected = getSelectedRootItems();
         if (selected.length === 0) return;

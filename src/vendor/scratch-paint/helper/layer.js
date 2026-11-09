@@ -1,6 +1,7 @@
 import paper from '@scratch/paper';
 import log from '../log/log';
-import {ART_BOARD_BOUNDS, ART_BOARD_WIDTH, ART_BOARD_HEIGHT, CENTER, MAX_WORKSPACE_BOUNDS} from './view';
+import {ART_BOARD_BOUNDS, ART_BOARD_WIDTH, ART_BOARD_HEIGHT, CENTER, MAX_WORKSPACE_BOUNDS, getRepeatedStageBounds, getStageBounds} from './view';
+import {getEditorSettings} from '../../../lib/features.js';
 import {isGroupItem} from './item';
 import {isBitmap, isVector} from '../lib/format';
 
@@ -286,18 +287,65 @@ const OUTLINE_INNER_LIGHT = '#FFFFFF';
 const OUTLINE_OUTER_LIGHT = '#4280D7';
 const OUTLINE_INNER_DARK = '#555555';
 
+const _makeStageFrame = function (bounds, isPrimary) {
+    const frame = new paper.Group();
+    if (isPrimary) {
+        const whiteRect = new paper.Shape.Rectangle(bounds.expand(1));
+        whiteRect.strokeWidth = 2;
+        whiteRect.strokeColor = OUTLINE_INNER_LIGHT;
+        setGuideItem(whiteRect);
+        frame.addChild(whiteRect);
+
+        const blueRect = new paper.Shape.Rectangle(bounds.expand(5));
+        blueRect.strokeWidth = 2;
+        blueRect.strokeColor = OUTLINE_OUTER_LIGHT;
+        blueRect.opacity = 0.25;
+        setGuideItem(blueRect);
+        frame.addChild(blueRect);
+    } else {
+        // Repeated frames are intentionally faint so they guide without
+        // competing with the artwork.
+        const rect = new paper.Shape.Rectangle(bounds);
+        rect.strokeWidth = Math.max(0.5, 1.2 / paper.view.zoom);
+        rect.strokeColor = OUTLINE_OUTER_LIGHT;
+        rect.opacity = 0.22;
+        setGuideItem(rect);
+        frame.addChild(rect);
+    }
+    return frame;
+};
+
+const refreshStageFrames = function () {
+    const outlineLayer = _getLayer('isOutlineLayer');
+    if (!outlineLayer) return;
+    outlineLayer.removeChildren();
+    const stage = getStageBounds();
+    for (const frameBounds of getRepeatedStageBounds()) {
+        const primary = Math.abs(frameBounds.center.x - stage.center.x) < 1e-6 &&
+            Math.abs(frameBounds.center.y - stage.center.y) < 1e-6;
+        outlineLayer.addChild(_makeStageFrame(frameBounds, primary));
+    }
+    outlineLayer.bringToFront();
+};
+
+const applyWorkspaceSettings = function (format) {
+    const backgroundGuideLayer = getBackgroundGuideLayer();
+    if (backgroundGuideLayer) {
+        const settings = getEditorSettings();
+        if (settings.infiniteCanvas) {
+            backgroundGuideLayer.vectorBackground.visible = false;
+            backgroundGuideLayer.bitmapBackground.visible = false;
+        } else if (format) {
+            _convertLayer(backgroundGuideLayer, format);
+        }
+    }
+    refreshStageFrames();
+};
+
 const _makeOutlineLayer = function () {
     const outlineLayer = new paper.Layer();
-    const whiteRect = new paper.Shape.Rectangle(ART_BOARD_BOUNDS.expand(1));
-    whiteRect.strokeWidth = 2;
-    whiteRect.strokeColor = OUTLINE_INNER_LIGHT;
-    setGuideItem(whiteRect);
-    const blueRect = new paper.Shape.Rectangle(ART_BOARD_BOUNDS.expand(5));
-    blueRect.strokeWidth = 2;
-    blueRect.strokeColor = OUTLINE_OUTER_LIGHT;
-    blueRect.opacity = 0.25;
-    setGuideItem(blueRect);
     outlineLayer.data.isOutlineLayer = true;
+    refreshStageFrames();
     return outlineLayer;
 };
 
@@ -359,7 +407,10 @@ const updateTheme = function (theme) {
     vectorChildren[1].children[1].fillColor = isDark ? BACKGROUND_TILE_DARK : BACKGROUND_TILE_LIGHT;
 
     const outlineLayer = getOutlineLayer();
-    outlineLayer.children[0].strokeColor = isDark ? OUTLINE_INNER_DARK : OUTLINE_INNER_LIGHT;
+    if (outlineLayer && outlineLayer.children[0] && outlineLayer.children[0].children[0]) {
+        outlineLayer.children[0].children[0].strokeColor = isDark ? OUTLINE_INNER_DARK : OUTLINE_INNER_LIGHT;
+    }
+    refreshStageFrames();
 };
 
 const setupLayers = function (format) {
@@ -374,6 +425,7 @@ const setupLayers = function (format) {
     outlineLayer.bringToFront();
     guideLayer.bringToFront();
     paintLayer.activate();
+    applyWorkspaceSettings(format);
 };
 
 export {
@@ -388,6 +440,8 @@ export {
     convertBackgroundGuideLayer,
     clearRaster,
     getRaster,
+    applyWorkspaceSettings,
+    refreshStageFrames,
     setGuideItem,
     updateTheme,
     setupLayers

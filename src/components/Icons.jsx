@@ -153,6 +153,16 @@ export const SlidersIcon = props => (
     </Icon>
 );
 
+export const PaletteIcon = props => (
+    <Icon {...props}>
+        <path d="M12 3a9 9 0 1 0 0 18h1.3a2.2 2.2 0 0 0 1.6-3.7 2.2 2.2 0 0 1 1.6-3.7H18a3 3 0 0 0 3-3A8 8 0 0 0 12 3z"/>
+        <circle cx="7.5" cy="10" r="1"/>
+        <circle cx="10" cy="6.8" r="1"/>
+        <circle cx="14" cy="6.8" r="1"/>
+        <circle cx="16.5" cy="10" r="1"/>
+    </Icon>
+);
+
 export const BrushIcon = props => (
     <Icon {...props}>
         <path d="M14.5 4.5 19.5 9.5 10 19H5v-5z"/>

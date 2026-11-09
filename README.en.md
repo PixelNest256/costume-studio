@@ -34,8 +34,9 @@ runs in your browser.
   apply the edited markup.
 - **Responsive toolbars** — less-used operations move into a **More** menu when
   available toolbar width is limited.
-- **Keyboard shortcuts** for saving, opening, and help.
+- **Keyboard shortcuts** for saving, opening, help, selection history, layer order, flips, and grouping. Matching keys are shown in the corner of toolbar buttons and their tooltips.
 - **Language and theme** are toggled from the editor's bottom-right controls.
+- **Editing aids** — fixed nudge distances, an infinite canvas, custom stage size, repeated stage frames, a reversible outline toggle, and a color palette (mix, complement, HSV→RGB, history).
 - **Built-in editor tools** — additional tools and operations are integrated in
   the editor. Some are original additions; others adapt or are informed by
   TurboWarp, PenguinMod, or Scratch Addons (see the provenance notes below).

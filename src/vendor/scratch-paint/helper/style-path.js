@@ -6,6 +6,7 @@ import GradientTypes from '../lib/gradient-types';
 import {DEFAULT_COLOR} from '../reducers/fill-style';
 import {isCompoundPathChild} from '../helper/compound-path';
 import log from '../log/log';
+import {getStrokeStyle, isStrokeDisabled, updateSavedStrokeColor, updateSavedStrokeWidth} from './stroke-state';
 
 const MIXED = 'scratch-paint/style-path/mixed';
 
@@ -172,6 +173,12 @@ const applyColorToSelection = function (
             item = item.parent;
         }
 
+        if (applyToStroke && isStrokeDisabled(item)) {
+            updateSavedStrokeColor(item, colorString);
+            changed = true;
+            continue;
+        }
+
         const itemColorProp = applyToStroke ? 'strokeColor' : 'fillColor';
         const itemColor = item[itemColorProp];
 
@@ -255,6 +262,14 @@ const applyGradientTypeToSelection = function (gradientType, applyToStroke, text
     for (let item of items) {
         if (item.parent instanceof paper.CompoundPath) {
             item = item.parent;
+        }
+
+        if (applyToStroke && isStrokeDisabled(item)) {
+            if (item.data && item.data.strokeStyle) {
+                item.data.strokeStyle.gradientType = gradientType;
+            }
+            changed = true;
+            continue;
         }
 
         const itemColorProp = applyToStroke ? 'strokeColor' : 'fillColor';
@@ -378,6 +393,9 @@ const applyStrokeWidthToSelection = function (value, textEditTargetId) {
         }
         if (isGroup(item)) {
             continue;
+        } else if (isStrokeDisabled(item)) {
+            updateSavedStrokeWidth(item, value);
+            changed = true;
         } else if (item.strokeWidth !== value) {
             item.strokeWidth = value;
             changed = true;
@@ -445,6 +463,9 @@ const getColorsFromSelection = function (selectedItems, bitmapMode) {
         let itemStrokeColor2String;
         let itemFillGradientType = GradientTypes.SOLID;
         let itemStrokeGradientType = GradientTypes.SOLID;
+        const savedStroke = getStrokeStyle(item);
+        const savedStrokeDisabled = isStrokeDisabled(item);
+        let displayStrokeWidth = item.strokeWidth;
 
         if (!isGroup(item)) {
             if (item.fillColor) {
@@ -463,7 +484,21 @@ const getColorsFromSelection = function (selectedItems, bitmapMode) {
                     itemFillColor2String = null;
                 }
             }
-            if (item.strokeColor) {
+            if (savedStrokeDisabled && savedStroke) {
+                displayStrokeWidth = savedStroke.width;
+                const savedColor = savedStroke.color;
+                if (savedColor && savedColor.type === 'gradient') {
+                    const {primary, secondary, gradientType} = _colorStateFromGradient(savedColor.gradient);
+                    itemStrokeColorString = primary;
+                    itemStrokeColor2String = secondary;
+                    itemStrokeGradientType = gradientType;
+                } else {
+                    itemStrokeColorString = savedColor && savedColor.alpha !== 0 ?
+                        savedColor.toCSS() :
+                        null;
+                    itemStrokeColor2String = null;
+                }
+            } else if (item.strokeColor) {
                 if (item.strokeColor.type === 'gradient') {
                     const {primary, secondary, gradientType} = _colorStateFromGradient(item.strokeColor.gradient);
 
@@ -514,9 +549,9 @@ const getColorsFromSelection = function (selectedItems, bitmapMode) {
                 selectionStrokeColor2String = itemStrokeColor2String;
                 selectionFillGradientType = itemFillGradientType;
                 selectionStrokeGradientType = itemStrokeGradientType;
-                selectionStrokeWidth = itemStrokeColorString || itemStrokeColor2String ? item.strokeWidth : 0;
-                if (item.strokeWidth && item.data && item.data.zoomLevel) {
-                    selectionThickness = item.strokeWidth / item.data.zoomLevel;
+                selectionStrokeWidth = itemStrokeColorString || itemStrokeColor2String ? displayStrokeWidth : 0;
+                if (displayStrokeWidth && item.data && item.data.zoomLevel) {
+                    selectionThickness = displayStrokeWidth / item.data.zoomLevel;
                 }
             }
             if (itemFillColorString !== selectionFillColorString) {
@@ -541,7 +576,7 @@ const getColorsFromSelection = function (selectedItems, bitmapMode) {
             if (itemStrokeColor2String !== selectionStrokeColor2String) {
                 selectionStrokeColor2String = MIXED;
             }
-            const itemStrokeWidth = itemStrokeColorString || itemStrokeColor2String ? item.strokeWidth : 0;
+            const itemStrokeWidth = itemStrokeColorString || itemStrokeColor2String ? displayStrokeWidth : 0;
             if (selectionStrokeWidth !== itemStrokeWidth) {
                 selectionStrokeWidth = null;
             }

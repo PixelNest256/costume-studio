@@ -21,8 +21,9 @@ import {setTheme as setReduxTheme} from '../reducers/theme';
 import {getBuiltinOutline, getCustomFont} from '../../../lib/custom-fonts.js';
 
 import {getSelectedLeafItems} from '../helper/selection';
+import {applyColorToSelection, applyStrokeWidthToSelection} from '../helper/style-path';
 import {convertToBitmap, convertToVector} from '../helper/bitmap';
-import {resetZoom, zoomOnSelection, OUTERMOST_ZOOM_LEVEL} from '../helper/view';
+import {CENTER, clampViewBounds, resetZoom, setWorkspaceBounds, zoomOnSelection, OUTERMOST_ZOOM_LEVEL} from '../helper/view';
 import EyeDropperTool from '../helper/tools/eye-dropper';
 
 import Modes, {BitmapModes, VectorModes} from '../lib/modes';
@@ -89,7 +90,9 @@ class PaintEditor extends React.Component {
             'handleZoomIn',
             'handleZoomOut',
             'handleZoomReset',
+            'handleResetView',
             'handleChangeTheme',
+            'handlePaletteApply',
             'handleConvertTextToPaths',
             'switchToBitmapMode'
         ]);
@@ -102,6 +105,7 @@ class PaintEditor extends React.Component {
     componentDidMount () {
         document.addEventListener('keydown', this.props.onKeyPress);
         document.addEventListener('keydown', this.handleEyeDropperKeyDown);
+        window.addEventListener('costume-studio:palette-apply', this.handlePaletteApply);
 
         // document listeners used to detect if a mouse is down outside of the
         // canvas, and should therefore stop the eye dropper
@@ -136,6 +140,7 @@ class PaintEditor extends React.Component {
     componentWillUnmount () {
         document.removeEventListener('keydown', this.props.onKeyPress);
         document.removeEventListener('keydown', this.handleEyeDropperKeyDown);
+        window.removeEventListener('costume-studio:palette-apply', this.handlePaletteApply);
         this.stopEyeDroppingLoop();
         document.removeEventListener('mousedown', this.onMouseDown);
         document.removeEventListener('touchstart', this.onMouseDown);
@@ -235,6 +240,14 @@ class PaintEditor extends React.Component {
         this.props.updateViewBounds(paper.view.matrix);
         this.handleSetSelectedItems();
     }
+    handleResetView () {
+        if (!paper.view) return;
+        paper.view.center = CENTER;
+        setWorkspaceBounds();
+        clampViewBounds();
+        this.props.updateViewBounds(paper.view.matrix);
+        this.handleSetSelectedItems();
+    }
     switchToBitmapMode () {
         this.props.handleSwitchToBitmap();
     }
@@ -247,6 +260,27 @@ class PaintEditor extends React.Component {
     handleChangeTheme () {
         const newTheme = this.getEffectiveTheme() === 'dark' ? 'light' : 'dark';
         this.props.setReduxTheme(newTheme);
+    }
+    handlePaletteApply (event) {
+        if (!isVector(this.props.format)) return;
+        const detail = event.detail || {};
+        const color = detail.color;
+        const target = detail.target;
+        if (!color) return;
+        const isStroke = target === 'stroke';
+        let changed = applyColorToSelection(
+            color,
+            0,
+            true,
+            isStroke,
+            this.props.textEditTarget
+        );
+        if (isStroke && changed) {
+            changed = applyStrokeWidthToSelection(1, this.props.textEditTarget) || changed;
+        }
+        if (!changed) return;
+        this.props.setSelectedItems(this.props.format);
+        this.props.onUpdateImage();
     }
     async handleConvertTextToPaths () {
         if (!isVector(this.props.format)) {
@@ -504,6 +538,7 @@ class PaintEditor extends React.Component {
                 onZoomIn={this.handleZoomIn}
                 onZoomOut={this.handleZoomOut}
                 onZoomReset={this.handleZoomReset}
+                onResetView={this.handleResetView}
             />
         );
     }

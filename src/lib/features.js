@@ -20,7 +20,18 @@ export const DEFAULT_FEATURES = {
     snapBoxEdgeMids: false,
     snapCtrlDisable: true,
     pasteNoOffset: true,
-    autoBackup: true
+    autoBackup: true,
+    // Nudge: when fixed is on, the numeric values are in project units
+    // (1 = one SVG unit), independent of the current zoom.
+    nudgeFixed: false,
+    nudgeNormal: 1,
+    nudgeShift: 15,
+    // Editor workspace extensions.
+    infiniteCanvas: false,
+    customStage: false,
+    stageWidth: 480,
+    stageHeight: 360,
+    repeatStage: false
 };
 
 export const FEATURE_GROUPS = [
@@ -63,6 +74,21 @@ export const FEATURE_GROUPS = [
         ]
     },
     {
+        id: 'nudge',
+        key: 'features.groupNudge',
+        items: [
+            ['nudgeFixed', 'features.nudgeFixed', 'features.nudgeFixedHint']
+        ]
+    },
+    {
+        id: 'workspace',
+        key: 'features.groupWorkspace',
+        items: [
+            ['infiniteCanvas', 'features.infiniteCanvas', 'features.infiniteCanvasHint'],
+            ['repeatStage', 'features.repeatStage', 'features.repeatStageHint']
+        ]
+    },
+    {
         id: 'backup',
         key: 'features.groupBackup',
         items: [
@@ -87,7 +113,12 @@ export const loadFeatureState = () => {
         const enabled = {...fallback.enabled};
         if (isPlainObject(data.enabled)) {
             for (const key of Object.keys(DEFAULT_FEATURES)) {
-                if (typeof data.enabled[key] === 'boolean') enabled[key] = data.enabled[key];
+                const fallback = DEFAULT_FEATURES[key];
+                if (typeof fallback === 'boolean' && typeof data.enabled[key] === 'boolean') {
+                    enabled[key] = data.enabled[key];
+                } else if (typeof fallback === 'number' && Number.isFinite(data.enabled[key])) {
+                    enabled[key] = data.enabled[key];
+                }
             }
         }
         return {enabled};
@@ -117,4 +148,33 @@ export const isSnapEnabled = () => {
         // ignore
     }
     return true;
+};
+
+
+export const getFeatureValue = id => {
+    const state = loadFeatureState();
+    return state.enabled[id];
+};
+
+export const getNudgeSettings = () => {
+    const state = loadFeatureState();
+    return {
+        fixed: state.enabled.nudgeFixed === true,
+        normal: Math.max(0.01, Number(state.enabled.nudgeNormal) || 1),
+        shift: Math.max(0.01, Number(state.enabled.nudgeShift) || 15)
+    };
+};
+
+export const getEditorSettings = () => {
+    const state = loadFeatureState();
+    const enabled = state.enabled;
+    const width = Math.max(16, Math.min(4096, Number(enabled.stageWidth) || 480));
+    const height = Math.max(16, Math.min(4096, Number(enabled.stageHeight) || 360));
+    return {
+        infiniteCanvas: enabled.infiniteCanvas === true,
+        customStage: enabled.customStage === true,
+        stageWidth: width,
+        stageHeight: height,
+        repeatStage: enabled.repeatStage === true
+    };
 };

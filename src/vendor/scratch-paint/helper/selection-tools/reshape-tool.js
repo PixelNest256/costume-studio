@@ -11,6 +11,7 @@ import MoveTool from './move-tool';
 import PointTool from './point-tool';
 import HandleTool from './handle-tool';
 import SelectionBoxTool from './selection-box-tool';
+import {getNudgeSettings} from '../../../../lib/features.js';
 
 /** Modes of the reshape tool, which can do many things depending on how it's used. */
 const ReshapeModes = keyMirror({
@@ -314,8 +315,19 @@ class ReshapeTool extends paper.Tool {
             // Ignore nudge if a text input field is focused
             return;
         }
+        const nativeEvent = event.event || {};
+        if (event.modifiers.control || event.modifiers.meta || event.modifiers.alt ||
+            nativeEvent.ctrlKey || nativeEvent.metaKey || nativeEvent.altKey) {
+            // Ctrl/Cmd+Arrow is reserved for layer ordering, and Alt is used
+            // by browser/OS shortcuts; do not also nudge the selection.
+            return;
+        }
 
-        const nudgeAmount = 1 / paper.view.zoom;
+        const settings = getNudgeSettings();
+        let nudgeAmount = settings.fixed ? settings.normal : 1 / paper.view.zoom;
+        if (event.modifiers.shift) {
+            nudgeAmount = settings.fixed ? settings.shift : nudgeAmount * 15;
+        }
         const selected = getSelectedLeafItems();
         if (selected.length === 0) return;
 

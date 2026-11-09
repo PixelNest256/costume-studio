@@ -7,6 +7,7 @@ import {inlineSvgFonts} from '@scratch/scratch-svg-renderer';
 
 import BackupDialog from './components/BackupDialog.jsx';
 import SvgCodePanel from './components/SvgCodePanel.jsx';
+import ColorPalettePanel from './components/ColorPalettePanel.jsx';
 import ConfirmDialog from './components/ConfirmDialog.jsx';
 import FeaturesMenu from './components/FeaturesMenu.jsx';
 import HelpDialog from './components/HelpDialog.jsx';
@@ -19,6 +20,7 @@ import {
     BrushIcon,
     FolderIcon,
     HistoryIcon,
+    PaletteIcon,
     PlusIcon,
     VectorIcon
 } from './components/Icons.jsx';
@@ -92,6 +94,7 @@ const App = () => {
     const [legalOpen, setLegalOpen] = useState(false);
     const [fontManagerOpen, setFontManagerOpen] = useState(false);
     const [codePanelOpen, setCodePanelOpen] = useState(false);
+    const [paletteOpen, setPaletteOpen] = useState(false);
     const [backupOpen, setBackupOpen] = useState(false);
     const [backups, setBackups] = useState(loadBackups);
     const [dragActive, setDragActive] = useState(false);
@@ -209,6 +212,19 @@ const App = () => {
         }));
     };
 
+    const changeFeatureValue = (id, value) => {
+        setFeaturePrefs(previous => ({
+            ...previous,
+            enabled: {...previous.enabled, [id]: value}
+        }));
+    };
+
+    useEffect(() => {
+        // The vendored canvas reads these settings directly from localStorage.
+        // Notify it after React has persisted the new values.
+        window.dispatchEvent(new Event('costume-studio:features-changed'));
+    }, [featurePrefs]);
+
     const toggleLocale = () => {
         const nextLocale = activeLocale === 'ja' ? 'en' : 'ja';
         dispatch(updateIntl({locale: nextLocale, messages: getMessages(nextLocale)}));
@@ -218,6 +234,12 @@ const App = () => {
     const handleUpdateName = useCallback(name => {
         setDoc(previous => (previous.name === name ? previous : {...previous, name}));
         setDirty(true);
+    }, []);
+
+    const handlePaletteApply = useCallback((color, target) => {
+        window.dispatchEvent(new CustomEvent('costume-studio:palette-apply', {
+            detail: {color, target}
+        }));
     }, []);
 
     const handleUpdateImage = useCallback((isVector, image, rotationCenterX, rotationCenterY) => {
@@ -692,6 +714,7 @@ const App = () => {
                     <FeaturesMenu
                         features={features}
                         onChange={next => setFeaturePrefs(previous => ({...previous, enabled: next}))}
+                        onChangeValue={changeFeatureValue}
                         onToggle={toggleFeature}
                     />
                     <button
@@ -703,6 +726,17 @@ const App = () => {
                         type="button"
                     >
                         <span className="action-label">{t('code.title', 'SVG code')}</span>
+                    </button>
+                    <button
+                        aria-label={t('palette.title', 'Color palette')}
+                        aria-pressed={paletteOpen}
+                        className={`button button-ghost${paletteOpen ? ' is-active' : ''}`}
+                        onClick={() => setPaletteOpen(value => !value)}
+                        title={t('palette.title', 'Color palette')}
+                        type="button"
+                    >
+                        <PaletteIcon size={18}/>
+                        <span className="action-label">{t('palette.title', 'Color palette')}</span>
                     </button>
                     <SaveMenu
                         busy={busy}
@@ -738,6 +772,11 @@ const App = () => {
                     onClose={() => setCodePanelOpen(false)}
                     t={t}
                     visible={codePanelOpen}
+                />
+                <ColorPalettePanel
+                    onApplyColor={handlePaletteApply}
+                    onClose={() => setPaletteOpen(false)}
+                    visible={paletteOpen}
                 />
             </main>
 

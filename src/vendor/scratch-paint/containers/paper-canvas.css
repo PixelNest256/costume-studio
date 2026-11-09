@@ -10,3 +10,13 @@
 [data-paint-theme="dark"] .paper-canvas {
     background-color: #222;
 }
+
+.canvas-backdrop {
+    inset: 0;
+    overflow: hidden;
+    position: absolute;
+}
+
+.canvas-backdrop > .paper-canvas {
+    position: absolute;
+}

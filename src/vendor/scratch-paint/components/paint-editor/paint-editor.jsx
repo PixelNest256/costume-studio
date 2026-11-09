@@ -38,6 +38,7 @@ import SelectMode from '../../containers/select-mode.jsx';
 import PreciseTransformMode from '../../containers/precise-transform-mode.jsx';
 import PreciseTransformPanel from '../precise-transform-panel/precise-transform-panel.jsx';
 import StrokeColorIndicatorComponent from '../../containers/stroke-color-indicator.jsx';
+import StrokeToggleComponent from '../../containers/stroke-toggle.jsx';
 import StrokeWidthIndicatorComponent from '../../containers/stroke-width-indicator.jsx';
 import TextMode from '../../containers/text-mode.jsx';
 
@@ -51,6 +52,7 @@ import themeIcon from './icons/theme.svg';
 import zoomInIcon from './icons/zoom-in.svg';
 import zoomOutIcon from './icons/zoom-out.svg';
 import zoomResetIcon from './icons/zoom-reset.svg';
+import centerViewIcon from './icons/center-view.svg';
 
 const messages = defineMessages({
     language: {defaultMessage: 'Switch language', description: 'Toggle app language', id: 'paint.paintEditor.language'},
@@ -78,6 +80,11 @@ const messages = defineMessages({
         defaultMessage: 'Zoom Reset',
         description: 'Accessible label for the reset zoom button',
         id: 'paint.paintEditor.zoomReset'
+    },
+    resetView: {
+        defaultMessage: 'Center view',
+        description: 'Accessible label for the button that centers the canvas view',
+        id: 'paint.paintEditor.centerView'
     },
     zoomIn: {
         defaultMessage: 'Zoom In',
@@ -137,6 +144,7 @@ const PaintEditorComponent = props => {
                                         enterExitTransitionDurationMs={20}
                                         popoverContent={(
                                             <InputGroup className={styles.colorToolsMenu}>
+                                                <StrokeToggleComponent onUpdateImage={props.onUpdateImage}/>
                                                 <StrokeColorIndicatorComponent onUpdateImage={props.onUpdateImage}/>
                                                 <StrokeWidthIndicatorComponent onUpdateImage={props.onUpdateImage}/>
                                             </InputGroup>
@@ -147,6 +155,7 @@ const PaintEditorComponent = props => {
                                     </Dropdown>
                                 ) : (
                                     <>
+                                        <StrokeToggleComponent onUpdateImage={props.onUpdateImage}/>
                                         <StrokeColorIndicatorComponent onUpdateImage={props.onUpdateImage}/>
                                         <StrokeWidthIndicatorComponent onUpdateImage={props.onUpdateImage}/>
                                     </>
@@ -336,6 +345,18 @@ const PaintEditorComponent = props => {
                             <ButtonGroup>
                                 <Button
                                     className={styles.buttonGroupButton}
+                                    onClick={props.onResetView}
+                                    title={intl.formatMessage(messages.resetView)}
+                                >
+                                    <img
+                                        alt={intl.formatMessage(messages.resetView)}
+                                        className={styles.buttonGroupButtonIcon}
+                                        draggable={false}
+                                        src={centerViewIcon}
+                                    />
+                                </Button>
+                                <Button
+                                    className={styles.buttonGroupButton}
                                     onClick={props.onZoomOut}
                                 >
                                     <img
@@ -424,6 +445,7 @@ PaintEditorComponent.propTypes = {
     activeLocale: PropTypes.string.isRequired,
     onToggleLanguage: PropTypes.func.isRequired,
     onRedo: PropTypes.func.isRequired,
+    onResetView: PropTypes.func.isRequired,
     onSwitchToBitmap: PropTypes.func.isRequired,
     onSwitchToVector: PropTypes.func.isRequired,
     onUndo: PropTypes.func.isRequired,

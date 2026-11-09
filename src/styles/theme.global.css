@@ -1100,10 +1100,36 @@ kbd {
     min-width: 0;
 }
 
-.feature-setting-grid {
+.feature-setting-grid,
+.feature-number-grid {
     display: grid;
     gap: 4px 16px;
     grid-template-columns: 1fr 1fr;
+}
+
+.feature-number-row {
+    align-items: center;
+    border-radius: 12px;
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+    padding: 8px 12px;
+}
+
+.feature-number-row:hover {
+    background: var(--surface);
+}
+
+.feature-number-input {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--ink);
+    flex: none;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 5px 7px;
+    width: 82px;
 }
 
 .feature-disclosure {
@@ -1942,4 +1968,230 @@ kbd {
 
 .modal-confirm .modal-footer {
     border-top: 0;
+}
+
+/* Small shortcut badges on editor buttons. The vendored paint editor uses
+   spans with role="button", so this applies to both real <button> elements
+   and those spans. */
+[data-shortcut] {
+    position: relative;
+}
+
+[data-shortcut]::after {
+    bottom: 1px;
+    color: currentColor;
+    content: attr(data-shortcut);
+    font-family: var(--font-sans);
+    font-size: 6px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    opacity: 0.58;
+    pointer-events: none;
+    position: absolute;
+    right: 2px;
+    white-space: nowrap;
+}
+
+[data-paint-theme="dark"] [data-shortcut]::after {
+    opacity: 0.72;
+}
+
+.stroke-toggle {
+    accent-color: var(--accent);
+    align-self: center;
+    cursor: pointer;
+    flex: none;
+    height: 14px;
+    margin: 0 2px 0 0;
+    width: 14px;
+}
+
+[data-paint-theme="dark"] .stroke-toggle {
+    accent-color: #9b7bd4;
+}
+
+/* Bottom color-palette utility panel */
+.color-palette-panel {
+    backdrop-filter: blur(10px);
+    background: var(--surface);
+    background: color-mix(in srgb, var(--surface) 96%, transparent);
+    border-top: 1px solid var(--border);
+    bottom: 0;
+    box-shadow: 0 -8px 26px rgba(31, 27, 22, 0.10);
+    display: flex;
+    flex-direction: column;
+    left: 0;
+    max-height: min(360px, 58vh);
+    overflow: auto;
+    position: absolute;
+    right: 0;
+    z-index: 12;
+}
+
+.color-palette-head {
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 14px;
+}
+
+.color-palette-head strong {
+    display: block;
+    font-size: 14px;
+}
+
+.color-palette-head small {
+    color: var(--muted);
+    display: block;
+    font-size: 11px;
+    margin-top: 2px;
+}
+
+.palette-grid {
+    display: grid;
+    gap: 10px;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    padding: 12px 14px 6px;
+}
+
+.palette-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    min-width: 0;
+    padding: 10px 12px;
+}
+
+.palette-card h3,
+.palette-history > span {
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    margin: 0 0 7px;
+    text-transform: uppercase;
+}
+
+.palette-inline,
+.palette-result-row,
+.palette-actions {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.palette-inline input[type="color"] {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    height: 28px;
+    padding: 2px;
+    width: 34px;
+}
+
+.palette-inline input[type="range"] {
+    accent-color: var(--accent);
+    flex: 1 1 70px;
+    min-width: 70px;
+}
+
+.palette-plus {
+    color: var(--muted);
+    font-weight: 700;
+}
+
+.palette-value,
+.palette-result-row code,
+.palette-inline code {
+    color: var(--secondary);
+    font-family: var(--font-mono);
+    font-size: 11px;
+}
+
+.palette-result {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    flex: none;
+    height: 26px;
+    width: 32px;
+}
+
+.palette-field {
+    align-items: center;
+    display: flex;
+    gap: 3px;
+}
+
+.palette-field span {
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 10px;
+}
+
+.palette-field input {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    color: var(--ink);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 4px;
+    width: 52px;
+}
+
+.palette-result-row .button,
+.palette-actions .button {
+    font-size: 11px;
+    padding: 4px 6px;
+}
+
+.palette-history {
+    align-items: center;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 12px;
+    padding: 8px 14px 12px;
+}
+
+.palette-history > span {
+    flex: none;
+    margin: 0;
+}
+
+.palette-swatches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.palette-swatch {
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    cursor: pointer;
+    height: 20px;
+    padding: 0;
+    width: 20px;
+}
+
+.palette-swatch:hover {
+    transform: translateY(-1px) scale(1.08);
+}
+
+.palette-history small {
+    color: var(--muted);
+    font-size: 11px;
+}
+
+@media (max-width: 760px) {
+    .color-palette-panel {
+        max-height: 52vh;
+    }
+
+    .palette-grid {
+        grid-template-columns: 1fr;
+    }
 }

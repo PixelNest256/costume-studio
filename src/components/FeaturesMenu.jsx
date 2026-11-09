@@ -16,6 +16,23 @@ const Switch = ({checked, onToggle, label}) => (
     </button>
 );
 
+const NumberSettingRow = ({features, onChangeValue, t, id, labelKey, min, max, step = 1}) => (
+    <label className="feature-number-row">
+        <span className="feature-row-text">
+            <strong>{t(labelKey, id)}</strong>
+        </span>
+        <input
+            className="feature-number-input"
+            max={max}
+            min={min}
+            onChange={event => onChangeValue(id, Number(event.target.value))}
+            step={step}
+            type="number"
+            value={features[id]}
+        />
+    </label>
+);
+
 const SettingRow = ({features, onToggle, t, id, labelKey, hintKey}) => (
     <div className="feature-setting">
         <span className="feature-row-text">
@@ -33,7 +50,7 @@ const SettingRow = ({features, onToggle, t, id, labelKey, hintKey}) => (
 // Large settings dialog (about 75% of the viewport). The snap settings that
 // used to be a long flat list are grouped into a card with subsections so
 // they can be scanned quickly.
-const FeaturesMenu = ({features, onChange, onToggle}) => {
+const FeaturesMenu = ({features, onChange, onChangeValue, onToggle}) => {
     const intl = useIntl();
     const t = (id, defaultMessage) => intl.formatMessage({id, defaultMessage});
     const [open, setOpen] = useState(false);
@@ -194,6 +211,92 @@ const FeaturesMenu = ({features, onChange, onToggle}) => {
                                     labelKey="features.pasteNoOffset"
                                     hintKey="features.pasteNoOffsetHint"
                                 />
+                            </section>
+
+                            <section className="features-card">
+                                <h3 className="features-card-title">{t('features.groupNudge', 'Arrow-key movement')}</h3>
+                                <SettingRow
+                                    features={features}
+                                    onToggle={onToggle}
+                                    t={t}
+                                    id="nudgeFixed"
+                                    labelKey="features.nudgeFixed"
+                                    hintKey="features.nudgeFixedHint"
+                                />
+                                {features.nudgeFixed ? (
+                                    <div className="feature-number-grid">
+                                        <NumberSettingRow
+                                            features={features}
+                                            onChangeValue={onChangeValue}
+                                            t={t}
+                                            id="nudgeNormal"
+                                            labelKey="features.nudgeNormal"
+                                            min={0.01}
+                                            max={1000}
+                                            step={0.1}
+                                        />
+                                        <NumberSettingRow
+                                            features={features}
+                                            onChangeValue={onChangeValue}
+                                            t={t}
+                                            id="nudgeShift"
+                                            labelKey="features.nudgeShift"
+                                            min={0.01}
+                                            max={10000}
+                                            step={0.1}
+                                        />
+                                    </div>
+                                ) : null}
+                            </section>
+
+                            <section className="features-card">
+                                <h3 className="features-card-title">{t('features.groupWorkspace', 'Workspace')}</h3>
+                                <SettingRow
+                                    features={features}
+                                    onToggle={onToggle}
+                                    t={t}
+                                    id="infiniteCanvas"
+                                    labelKey="features.infiniteCanvas"
+                                    hintKey="features.infiniteCanvasHint"
+                                />
+                                <SettingRow
+                                    features={features}
+                                    onToggle={onToggle}
+                                    t={t}
+                                    id="repeatStage"
+                                    labelKey="features.repeatStage"
+                                    hintKey="features.repeatStageHint"
+                                />
+                                <SettingRow
+                                    features={features}
+                                    onToggle={onToggle}
+                                    t={t}
+                                    id="customStage"
+                                    labelKey="features.customStage"
+                                    hintKey="features.customStageHint"
+                                />
+                                {features.customStage ? (
+                                    <div className="feature-number-grid">
+                                        <NumberSettingRow
+                                            features={features}
+                                            onChangeValue={onChangeValue}
+                                            t={t}
+                                            id="stageWidth"
+                                            labelKey="features.stageWidth"
+                                            min={16}
+                                            max={4096}
+                                        />
+                                        <NumberSettingRow
+                                            features={features}
+                                            onChangeValue={onChangeValue}
+                                            t={t}
+                                            id="stageHeight"
+                                            labelKey="features.stageHeight"
+                                            min={16}
+                                            max={4096}
+                                        />
+                                    </div>
+                                ) : null}
                             </section>
 
                             <section className="features-card">
