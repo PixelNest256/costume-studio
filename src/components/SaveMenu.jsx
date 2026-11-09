@@ -5,7 +5,7 @@ import {formatShortcut} from '../lib/shortcuts.js';
 
 // Split save control: the main button performs the current costume's default
 // export, while the caret opens the full list of export formats.
-const SaveMenu = ({busy, canExportPaths = true, defaultKind = 'svg', disabled, onSave}) => {
+const SaveMenu = ({busy, canExportPaths = true, defaultKind = 'svg', disabled, onSave, openRequest = 0}) => {
     const intl = useIntl();
     const t = (id, defaultMessage) => intl.formatMessage({id, defaultMessage});
     const [open, setOpen] = useState(false);
@@ -45,6 +45,17 @@ const SaveMenu = ({busy, canExportPaths = true, defaultKind = 'svg', disabled, o
         }, 0);
         return () => window.clearTimeout(timer);
     }, [open]);
+
+    useEffect(() => {
+        if (!openRequest || isDisabled) return;
+        setOpen(true);
+        // If the menu was already open, make sure keyboard focus lands on
+        // the default SVG (vector) option again.
+        const timer = window.setTimeout(() => {
+            menuRef.current?.querySelector('[role="menuitem"]:not(:disabled)')?.focus();
+        }, 0);
+        return () => window.clearTimeout(timer);
+    }, [openRequest]); // only a new shortcut request should open the menu
 
     const options = [
         {kind: 'svg', label: t('save.svg', 'SVG'), hint: t('save.svgHint', 'Scalable vector artwork')},

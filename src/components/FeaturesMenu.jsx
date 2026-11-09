@@ -1,6 +1,5 @@
 import React, {useEffect, useState} from 'react';
 import {useIntl} from 'react-intl';
-import {FEATURE_GROUPS} from '../lib/features.js';
 import {SlidersIcon, CloseIcon} from './Icons.jsx';
 
 const Switch = ({checked, onToggle, label}) => (
@@ -50,7 +49,7 @@ const SettingRow = ({features, onToggle, t, id, labelKey, hintKey}) => (
 // Large settings dialog (about 75% of the viewport). The snap settings that
 // used to be a long flat list are grouped into a card with subsections so
 // they can be scanned quickly.
-const FeaturesMenu = ({features, onChange, onChangeValue, onToggle}) => {
+const FeaturesMenu = ({features, onChangeValue, onToggle}) => {
     const intl = useIntl();
     const t = (id, defaultMessage) => intl.formatMessage({id, defaultMessage});
     const [open, setOpen] = useState(false);
@@ -64,14 +63,6 @@ const FeaturesMenu = ({features, onChange, onChangeValue, onToggle}) => {
         document.addEventListener('keydown', handleKeyDown);
         return () => document.removeEventListener('keydown', handleKeyDown);
     }, [open]);
-
-    const setAll = value => {
-        const next = {...features};
-        for (const group of FEATURE_GROUPS) {
-            for (const [id] of group.items) next[id] = value;
-        }
-        onChange(next);
-    };
 
     const snapTo = [
         ['snapPageCenter', 'features.snapPageCenter'],
@@ -313,14 +304,6 @@ const FeaturesMenu = ({features, onChange, onChangeValue, onToggle}) => {
                         </div>
 
                         <footer className="features-dialog-foot">
-                            <div className="features-dialog-foot-left">
-                                <button className="button button-ghost button-small" onClick={() => setAll(true)} type="button">
-                                    {t('features.enableAll', 'Enable all')}
-                                </button>
-                                <button className="button button-ghost button-small" onClick={() => setAll(false)} type="button">
-                                    {t('features.disableAll', 'Disable all')}
-                                </button>
-                            </div>
                             <button className="button button-primary" onClick={() => setOpen(false)} type="button">
                                 {t('features.close', 'Close')}
                             </button>

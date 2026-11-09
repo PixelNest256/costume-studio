@@ -718,7 +718,7 @@ a {
 }
 
 .modal-help {
-    width: min(720px, 100%);
+    width: min(960px, 100%);
 }
 
 .modal-header {
@@ -878,8 +878,8 @@ a {
 
 .shortcut-grid {
     display: grid;
-    gap: 0 24px;
-    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    grid-template-columns: 1fr;
 }
 
 .shortcut-row {
@@ -1166,7 +1166,7 @@ kbd {
     border-top: 1px solid var(--border);
     display: flex;
     flex: none;
-    justify-content: space-between;
+    justify-content: flex-end;
     padding: 16px 24px;
 }
 
@@ -2156,7 +2156,10 @@ kbd {
 .palette-result-row .button,
 .palette-actions .button {
     font-size: 11px;
-    padding: 4px;
+    height: auto;
+    line-height: 1.2;
+    min-height: 0;
+    padding: 5px;
 }
 
 .palette-history {
@@ -2220,12 +2223,11 @@ kbd {
 }
 
 
-/* The left tool palette is a primary navigation surface: make its
-   single-letter shortcut hints three times larger than the compact
-   operation-button hints. */
+/* The left tool palette is a primary navigation surface: its single-letter
+   shortcut hints are larger than the compact operation-button hints. */
 [class*="mode-selector"] [data-shortcut]::after {
-    bottom: 2px;
-    font-size: 18px;
+    bottom: 1px;
+    font-size: 12px;
     opacity: 0.72;
-    right: 3px;
+    right: 1px;
 }

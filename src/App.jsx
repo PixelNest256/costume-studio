@@ -97,6 +97,7 @@ const App = () => {
     const [fontManagerOpen, setFontManagerOpen] = useState(false);
     const [codePanelOpen, setCodePanelOpen] = useState(false);
     const [paletteOpen, setPaletteOpen] = useState(false);
+    const [saveMenuRequest, setSaveMenuRequest] = useState(0);
     const [backupOpen, setBackupOpen] = useState(false);
     const [backups, setBackups] = useState(loadBackups);
     const [dragActive, setDragActive] = useState(false);
@@ -618,7 +619,16 @@ const App = () => {
             const key = event.key.toLowerCase();
             if (key === 's') {
                 event.preventDefault();
-                handleSave(event.shiftKey ? 'svg' : (doc.format === 'bitmap' ? 'png' : 'svg'));
+                if (event.shiftKey) {
+                    handleSave('svg');
+                } else if (doc.image) {
+                    // Ctrl/Cmd+S opens the save-format menu instead of
+                    // silently choosing a format. SaveMenu focuses the first
+                    // option (SVG vector), so arrows + Enter work immediately.
+                    setSaveMenuRequest(value => value + 1);
+                } else {
+                    showToast('toast.empty');
+                }
             } else if (key === 'o') {
                 event.preventDefault();
                 handleOpenClick();
@@ -632,7 +642,7 @@ const App = () => {
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [doc.format, handleOpenClick, handleSave]);
+    }, [doc.format, doc.image, handleOpenClick, handleSave, showToast]);
 
     const handleDragEnter = event => {
         const types = event.dataTransfer && event.dataTransfer.types;
@@ -722,7 +732,6 @@ const App = () => {
                     </AppMenu>
                     <FeaturesMenu
                         features={features}
-                        onChange={next => setFeaturePrefs(previous => ({...previous, enabled: next}))}
                         onChangeValue={changeFeatureValue}
                         onToggle={toggleFeature}
                     />
@@ -753,6 +762,7 @@ const App = () => {
                         defaultKind={doc.format === 'bitmap' ? 'png' : 'svg'}
                         disabled={!doc.image}
                         onSave={handleSave}
+                        openRequest={saveMenuRequest}
                     />
                 </div>
             </header>

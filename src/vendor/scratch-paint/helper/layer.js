@@ -289,6 +289,9 @@ const OUTLINE_INNER_DARK = '#555555';
 
 const _makeStageFrame = function (bounds, isPrimary) {
     const frame = new paper.Group();
+    // Mark the whole group as a guide. Marking only the child rectangles
+    // leaves the group itself selectable in the paint editor.
+    setGuideItem(frame);
     if (isPrimary) {
         const whiteRect = new paper.Shape.Rectangle(bounds.expand(1));
         whiteRect.strokeWidth = 2;
@@ -345,6 +348,7 @@ const applyWorkspaceSettings = function (format) {
 const _makeOutlineLayer = function () {
     const outlineLayer = new paper.Layer();
     outlineLayer.data.isOutlineLayer = true;
+    outlineLayer.locked = true;
     refreshStageFrames();
     return outlineLayer;
 };

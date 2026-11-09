@@ -23,15 +23,15 @@ export const DEFAULT_FEATURES = {
     autoBackup: true,
     // Nudge: when fixed is on, the numeric values are in project units
     // (1 = one SVG unit), independent of the current zoom.
-    nudgeFixed: false,
+    nudgeFixed: true,
     nudgeNormal: 1,
     nudgeShift: 15,
     // Editor workspace extensions.
-    infiniteCanvas: false,
+    infiniteCanvas: true,
     customStage: false,
     stageWidth: 480,
     stageHeight: 360,
-    repeatStage: false
+    repeatStage: true
 };
 
 export const FEATURE_GROUPS = [
@@ -97,9 +97,13 @@ export const FEATURE_GROUPS = [
     }
 ];
 
+const FEATURE_SCHEMA_VERSION = 2;
+const NEW_ENABLED_DEFAULTS = ['nudgeFixed', 'infiniteCanvas', 'repeatStage'];
+
 const isPlainObject = value => (value && typeof value === 'object' && !Array.isArray(value));
 
 export const createDefaultState = () => ({
+    version: FEATURE_SCHEMA_VERSION,
     enabled: {...DEFAULT_FEATURES}
 });
 
@@ -111,6 +115,7 @@ export const loadFeatureState = () => {
         const data = JSON.parse(raw);
         if (!isPlainObject(data)) return fallback;
         const enabled = {...fallback.enabled};
+        const isCurrentSchema = data.version === FEATURE_SCHEMA_VERSION;
         if (isPlainObject(data.enabled)) {
             for (const key of Object.keys(DEFAULT_FEATURES)) {
                 const fallback = DEFAULT_FEATURES[key];
@@ -121,7 +126,12 @@ export const loadFeatureState = () => {
                 }
             }
         }
-        return {enabled};
+        if (!isCurrentSchema) {
+            // Migrate older sessions to the new opt-out defaults once. After
+            // this, a user's explicit false value is preserved.
+            for (const key of NEW_ENABLED_DEFAULTS) enabled[key] = true;
+        }
+        return {version: FEATURE_SCHEMA_VERSION, enabled};
     } catch (error) {
         return fallback;
     }
