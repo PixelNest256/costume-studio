@@ -1,0 +1,29 @@
+.readout {
+  /* Match TurboWarp tw-paint exactly: 28x16 content box, font inherited
+     from the row header (0.65rem). Do NOT force border-box/padding:0 here.
+     Upstream relies on the Input component's own padding (0 0.75rem) and
+     border, so the rendered pill is wider (~54px total). Forcing
+     border-box + padding:0 shrank it to 28px total, narrower than upstream.
+     Explicit font-size keeps the digits at upstream size instead of
+     inheriting the app shell's larger input font. */
+  width: 28px;
+  height: 16px;
+  text-align: center;
+  -moz-appearance: textfield;
+  font: inherit;
+  font-weight: bold;
+  font-size: 0.65rem;
+  line-height: 1;
+  box-sizing: content-box;
+}
+[dir="ltr"] .readout {
+  margin-left: 10px;
+}
+[dir="rtl"] .readout {
+  margin-right: 10px;
+}
+.readout::-webkit-outer-spin-button,
+.readout::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
