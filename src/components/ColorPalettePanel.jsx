@@ -1,7 +1,6 @@
 import React, {useEffect, useMemo, useState} from 'react';
 import {useIntl} from 'react-intl';
 import {
-    adjustLightness,
     clamp,
     complementColor,
     hexToHsv,
@@ -172,20 +171,6 @@ const ColorPalettePanel = ({visible, onApplyColor, onClose}) => {
                     </div>
                 </section>
 
-                <section className="palette-card">
-                    <h3>{t('palette.tools', 'Quick tools')}</h3>
-                    <div className="palette-actions">
-                        <button className="button button-small button-ghost" onClick={() => setHsv(hexToHsv(adjustLightness(hsvHex, 0.12)))} type="button">
-                            {t('palette.lighten', 'Lighten')}
-                        </button>
-                        <button className="button button-small button-ghost" onClick={() => setHsv(hexToHsv(adjustLightness(hsvHex, -0.12)))} type="button">
-                            {t('palette.darken', 'Darken')}
-                        </button>
-                        <button className="button button-small button-ghost" onClick={() => setHsv(hexToHsv(complementColor(hsvHex)))} type="button">
-                            {t('palette.complementShort', 'Complement')}
-                        </button>
-                    </div>
-                </section>
             </div>
 
             <div className="palette-history">

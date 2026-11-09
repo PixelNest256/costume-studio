@@ -876,21 +876,36 @@ a {
     width: 28px;
 }
 
-.shortcut-grid {
-    display: grid;
-    gap: 0;
-    grid-template-columns: 1fr;
+.shortcut-table {
+    border-top: 1px solid var(--border);
+    margin-top: 4px;
 }
 
+.shortcut-table-head,
 .shortcut-row {
     align-items: center;
     border-bottom: 1px solid var(--border);
+    display: grid;
+    gap: 16px;
+    grid-template-columns: minmax(180px, 1fr) minmax(280px, 1.2fr);
+    padding: 8px 4px;
+}
+
+.shortcut-table-head {
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.shortcut-row {
     color: var(--secondary);
-    display: flex;
     font-size: 12px;
-    gap: 12px;
-    justify-content: space-between;
-    padding: 8px 0;
+}
+
+.shortcut-row kbd {
+    justify-self: start;
 }
 
 kbd {
@@ -1827,8 +1842,15 @@ kbd {
         font-size: 11px;
     }
 
-    .shortcut-grid {
+    .shortcut-table-head,
+    .shortcut-row {
+        gap: 4px;
         grid-template-columns: 1fr;
+        padding: 8px 0;
+    }
+
+    .shortcut-table-head span:last-child {
+        display: none;
     }
 
     .modal-body {
@@ -2052,8 +2074,8 @@ kbd {
 .palette-grid {
     display: grid;
     gap: 0;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    padding: 10px 14px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    padding: 14px 18px 16px;
 }
 
 .palette-card {
@@ -2062,7 +2084,7 @@ kbd {
     border-left: 1px solid var(--border);
     border-radius: 0;
     min-width: 0;
-    padding: 4px 12px;
+    padding: 8px 18px 10px;
 }
 
 .palette-card:first-child {
@@ -2080,7 +2102,7 @@ kbd {
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.05em;
-    margin: 0 0 7px;
+    margin: 0 0 10px;
     text-transform: uppercase;
 }
 
@@ -2090,7 +2112,7 @@ kbd {
     align-items: center;
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
+    gap: 8px;
 }
 
 .palette-inline input[type="color"] {
@@ -2159,15 +2181,15 @@ kbd {
     height: auto;
     line-height: 1.2;
     min-height: 0;
-    padding: 5px;
+    padding: 6px;
 }
 
 .palette-history {
     align-items: center;
     border-top: 1px solid var(--border);
     display: flex;
-    gap: 12px;
-    padding: 8px 14px 12px;
+    gap: 14px;
+    padding: 12px 18px 16px;
 }
 
 .palette-history > span {
@@ -2206,7 +2228,7 @@ kbd {
 
     .palette-grid {
         grid-template-columns: 1fr;
-        padding: 4px 14px;
+        padding: 6px 18px 10px;
     }
 
     .palette-card,

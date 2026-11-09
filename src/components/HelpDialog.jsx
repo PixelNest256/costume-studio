@@ -75,7 +75,11 @@ const HelpDialog = ({sourceUrl, licenseUrl, onClose, onOpenSample}) => {
             </ul>
 
             <h3>{t('help.shortcutsTitle', 'Shortcuts')}</h3>
-            <div className="shortcut-grid">
+            <div className="shortcut-table">
+                <div className="shortcut-table-head">
+                    <span>{t('help.shortcutAction', 'Action')}</span>
+                    <span>{t('help.shortcutKeys', 'Shortcut')}</span>
+                </div>
                 {SHORTCUTS.map(([id, keys]) => (
                     <div className="shortcut-row" key={id}>
                         <span>{t(id, '')}</span>
