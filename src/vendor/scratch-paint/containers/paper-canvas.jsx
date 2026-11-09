@@ -464,7 +464,9 @@ class PaperCanvas extends React.Component {
         }, 0);
     }
     refreshBackdrop (theme = this.props.theme) {
-        if (!this.canvas || !this.backdrop) return;
+        // setBackdrop() runs during the initial ref commit, before
+        // paper.setup() creates the view. The real setup pass refreshes again.
+        if (!this.canvas || !this.backdrop || !paper.view) return;
         const settings = getEditorSettings();
         const canvas = this.canvas;
         const backdrop = this.backdrop;
