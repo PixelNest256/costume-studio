@@ -91,6 +91,8 @@ class PaintEditor extends React.Component {
             'handleZoomOut',
             'handleZoomReset',
             'handleResetView',
+            'handleResetViewAndZoom',
+            'handleViewKeyDown',
             'handleChangeTheme',
             'handlePaletteApply',
             'handleConvertTextToPaths',
@@ -105,6 +107,7 @@ class PaintEditor extends React.Component {
     componentDidMount () {
         document.addEventListener('keydown', this.props.onKeyPress);
         document.addEventListener('keydown', this.handleEyeDropperKeyDown);
+        document.addEventListener('keydown', this.handleViewKeyDown);
         window.addEventListener('costume-studio:palette-apply', this.handlePaletteApply);
 
         // document listeners used to detect if a mouse is down outside of the
@@ -140,6 +143,7 @@ class PaintEditor extends React.Component {
     componentWillUnmount () {
         document.removeEventListener('keydown', this.props.onKeyPress);
         document.removeEventListener('keydown', this.handleEyeDropperKeyDown);
+        document.removeEventListener('keydown', this.handleViewKeyDown);
         window.removeEventListener('costume-studio:palette-apply', this.handlePaletteApply);
         this.stopEyeDroppingLoop();
         document.removeEventListener('mousedown', this.onMouseDown);
@@ -247,6 +251,28 @@ class PaintEditor extends React.Component {
         clampViewBounds();
         this.props.updateViewBounds(paper.view.matrix);
         this.handleSetSelectedItems();
+    }
+    handleResetViewAndZoom () {
+        resetZoom();
+        this.handleResetView();
+    }
+    handleViewKeyDown (event) {
+        const isZero = event.code === 'Digit0' || event.code === 'Numpad0' ||
+            event.key === '0' || event.key === ')';
+        if (!(event.ctrlKey || event.metaKey) || event.altKey || !isZero) return;
+        const target = event.target;
+        if (target && (
+            target.tagName === 'INPUT' ||
+            target.tagName === 'TEXTAREA' ||
+            target.isContentEditable ||
+            (target.closest && target.closest('.cm-content, .svg-code-editor'))
+        )) return;
+        event.preventDefault();
+        if (event.shiftKey) {
+            this.handleResetViewAndZoom();
+        } else {
+            this.handleZoomReset();
+        }
     }
     switchToBitmapMode () {
         this.props.handleSwitchToBitmap();

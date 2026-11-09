@@ -14,7 +14,7 @@ import ColorPickerComponent from '../components/color-picker/color-picker.jsx';
 import {MIXED} from '../helper/style-path';
 import Modes from '../lib/modes';
 import {colorToHex, makeAlphaComponent} from '../lib/tw-color-utils';
-import {addColorHistory, getColorHistory} from '../../../lib/color-history.js';
+import {getColorHistory} from '../../../lib/color-history.js';
 
 const colorStringToHsv = hexString => {
     let hsv;
@@ -77,6 +77,14 @@ class ColorPicker extends React.Component {
             history: getColorHistory()
         };
     }
+    getCurrentColor () {
+        return hsvToHex(
+            this.state.hue,
+            this.state.saturation,
+            this.state.brightness,
+            this.state.alpha
+        );
+    }
     componentWillReceiveProps (newProps) {
         const color = newProps.colorIndex === 0 ? this.props.color : this.props.color2;
         const newColor = newProps.colorIndex === 0 ? newProps.color : newProps.color2;
@@ -123,14 +131,7 @@ class ColorPicker extends React.Component {
         });
     }
     handleColorChange () {
-        const color = hsvToHex(
-            this.state.hue,
-            this.state.saturation,
-            this.state.brightness,
-            this.state.alpha
-        );
-        this.props.onChangeColor(color);
-        this.setState({history: addColorHistory(color)});
+        this.props.onChangeColor(this.getCurrentColor());
     }
     handleSaturationBrightnessChange (saturation, brightness) {
         this.ensureNonZeroAlpha();
@@ -169,7 +170,6 @@ class ColorPicker extends React.Component {
             alpha: hsv[3]
         });
         this.props.onChangeColor(color);
-        this.setState({history: addColorHistory(color)});
     }
     handleTransparent () {
         this.props.onChangeColor(null);

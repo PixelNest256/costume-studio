@@ -69,7 +69,7 @@ Scratch のペイントエディター（[`@scratch/scratch-paint`](https://gith
 | 現在の形式で保存 | `Ctrl` / `⌘` + `S` |
 | SVG で保存 | `Ctrl` / `⌘` + `Shift` + `S` |
 | ファイルを開く | `Ctrl` / `⌘` + `O` |
-| 元に戻す / やり直す | `Ctrl` / `⌘` + `Z` / `Shift` + `Z` |
+| 元に戻す / やり直す | `Ctrl` / `⌘` + `Z` / `Y` / `Shift` + `Z` |
 | コピー / 貼り付け / 切り取り | `Ctrl` / `⌘` + `C` / `V` / `X` |
 | すべて選択 | `Ctrl` / `⌘` + `A` |
 | 選択したものを削除 | `Delete` / `Backspace` |
@@ -78,6 +78,7 @@ Scratch のペイントエディター（[`@scratch/scratch-paint`](https://gith
 | グループ化 / 解除 | `Ctrl` / `⌘` + `G` / `Ctrl` / `⌘` + `Shift` + `G` |
 | 左右反転 / 上下反転 | `Shift` + `H` / `Shift` + `V` |
 | 選択履歴を前後に移動 | `Tab` / `Shift` + `Tab` |
+| ズームを標準に戻す / 視点とズームを標準に戻す | `Ctrl` / `⌘` + `0` / `Ctrl` / `⌘` + `Shift` + `0` |
 | ヘルプを開く | `?` |
 | 精密変形 | 専用ツール（数値操作） |
 

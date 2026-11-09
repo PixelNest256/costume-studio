@@ -286,13 +286,14 @@ Data URL で保存する（最大 20 件、1 件 15 MB）。ファイルフォ�
 | --- | --- |
 | `S` / `A` / `B` / `E` / `F` / `T` / `L` / `C` / `R` | 選択 / 変形 / ブラシ / 消しゴム / 塗り / テキスト / 線 / 円 / 四角 |
 | `P` / `Y` / `V` / `M` | ペン / 三角 / 矢印 / スタンプ（本アプリ独自） |
-| `Ctrl/Cmd + Z` / `Shift+Z` | 元に戻す / やり直す |
+| `Ctrl/Cmd + Z` / `Y` / `Shift+Z` | 元に戻す / やり直す |
 | `Ctrl/Cmd + S` / `Shift+S` / `O` | 保存 / SVG 保存 / 開く |
 | `Ctrl/Cmd + ↑` / `↓` | 手前に出す / 奥に下げる |
 | `Ctrl/Cmd + Shift + ↑` / `↓` | 最前面 / 最背面 |
 | `Ctrl/Cmd + G` / `Ctrl/Cmd + Shift+G` | グループ化 / 解除 |
 | `Shift+H` / `Shift+V` | 左右反転 / 上下反転 |
 | `Tab` / `Shift+Tab` | 選択履歴を前 / 後に移動 |
+| `Ctrl/Cmd + 0` / `Ctrl/Cmd + Shift + 0` | ズーム標準 / 視点とズームを標準 |
 | `?` | ヘルプ |
 
 `Ctrl+Z` 等はブラウザ側に奪われないよう `preventDefault` 済み。

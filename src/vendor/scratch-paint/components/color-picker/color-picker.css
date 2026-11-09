@@ -146,9 +146,10 @@
 
 .color-picker-container {
     box-sizing: border-box;
-    padding-right: 124px;
+    min-height: 220px;
+    padding-right: 132px;
     position: relative;
-    width: 334px;
+    width: 342px;
 }
 
 .sv-picker {
@@ -181,32 +182,37 @@
 
 .history-row {
     border-top: 1px solid var(--paint-ui-pane-border, #ddd);
-    margin: 10px 8px 4px;
-    padding-top: 8px;
+    margin: 0;
+    padding: 6px 0 0;
+    position: absolute;
+    right: 6px;
+    top: 124px;
+    width: 124px;
 }
 
 .history-label {
     color: var(--paint-text-primary, #575E75);
     display: block;
     font-family: "Helvetica Neue", Helvetica, sans-serif;
-    font-size: 0.65rem;
+    font-size: 0.62rem;
     font-weight: bold;
-    margin-bottom: 5px;
+    margin-bottom: 4px;
 }
 
 .history-swatches {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
+    display: grid;
+    gap: 2px;
+    grid-template-columns: repeat(9, minmax(0, 1fr));
 }
 
 .history-swatch {
     border: 1px solid var(--paint-ui-pane-border, #ddd);
-    border-radius: 4px;
+    border-radius: 2px;
     cursor: pointer;
-    height: 18px;
+    height: 11px;
+    min-width: 0;
     padding: 0;
-    width: 18px;
+    width: auto;
 }
 
 .history-swatch:hover {

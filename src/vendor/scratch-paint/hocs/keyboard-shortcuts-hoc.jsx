@@ -149,6 +149,9 @@ const KeyboardShortcutsHOC = function (WrappedComponent) {
                 } else if (key === 'z') {
                     event.preventDefault();
                     this.props.onUndo();
+                } else if (key === 'y') {
+                    event.preventDefault();
+                    this.props.onRedo();
                 } else if (key === 'arrowup' || key === 'arrowdown') {
                     event.preventDefault();
                     if (key === 'arrowup') {

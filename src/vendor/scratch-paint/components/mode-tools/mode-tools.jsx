@@ -652,7 +652,6 @@ const ModeToolsComponent = props => {
                     <LabeledIconButton
                         hideLabel={hideLabel(props.intl.locale)}
                         imgSrc={deleteIcon}
-                        shortcut="Delete"
                         title={props.intl.formatMessage(messages.delete)}
                         onClick={props.onDelete}
                     />
@@ -801,7 +800,6 @@ const ModeToolsComponent = props => {
                     <LabeledIconButton
                         hideLabel={hideLabel(props.intl.locale)}
                         imgSrc={copyIcon}
-                        shortcut="Ctrl+C"
                         title={props.intl.formatMessage(messages.copy)}
                         onClick={props.onCopyToClipboard}
                     />
@@ -809,14 +807,12 @@ const ModeToolsComponent = props => {
                         disabled={!(props.clipboardItems.length > 0)}
                         hideLabel={hideLabel(props.intl.locale)}
                         imgSrc={pasteIcon}
-                        shortcut="Ctrl+V"
                         title={props.intl.formatMessage(messages.paste)}
                         onClick={props.onPasteFromClipboard}
                     />
                     <LabeledIconButton
                         hideLabel={hideLabel(props.intl.locale)}
                         imgSrc={cutIcon}
-                        shortcut="Ctrl+X"
                         title={props.intl.formatMessage(messages.cut)}
                         onClick={props.onCutToClipboard}
                     />
@@ -827,7 +823,6 @@ const ModeToolsComponent = props => {
                     <LabeledIconButton
                         hideLabel={hideLabel(props.intl.locale)}
                         imgSrc={deleteIcon}
-                        shortcut="Delete"
                         title={props.intl.formatMessage(messages.delete)}
                         onClick={props.onDelete}
                     />

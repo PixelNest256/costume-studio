@@ -6,6 +6,7 @@ import {injectIntl} from 'react-intl';
 import intlShape from '../lib/intl-shape.js';
 
 import {getSelectedLeafItems} from '../helper/selection';
+import {addColorHistory} from '../../../lib/color-history.js';
 import Formats, {isBitmap} from '../lib/format';
 import GradientTypes from '../lib/gradient-types';
 
@@ -35,7 +36,10 @@ const makeColorIndicator = (label, isStroke) => {
             const {colorModalVisible, onUpdateImage} = this.props;
             if (colorModalVisible && !newProps.colorModalVisible) {
                 // Submit the new SVG, which also stores a single undo/redo action.
-                if (this._hasChanged) onUpdateImage();
+                if (this._hasChanged) {
+                    this.rememberUsedColor(newProps);
+                    onUpdateImage();
+                }
                 this._hasChanged = false;
             }
         }
@@ -76,7 +80,9 @@ const makeColorIndicator = (label, isStroke) => {
                 // is set to true via the "Fill"/"Outline" selector button
                 isStroke || (formatIsBitmap && !this.props.fillBitmapShapes),
                 this.props.textEditTarget);
-            this._hasChanged = this._hasChanged || isDifferent;
+            // Record a color when the picker closes even if nothing is
+            // selected; it is still the active color for the next drawing.
+            this._hasChanged = true;
             this.props.onChangeColor(newColor, this.props.colorIndex);
         }
         handleChangeGradientType (gradientType) {
@@ -103,11 +109,18 @@ const makeColorIndicator = (label, isStroke) => {
             }
             if (this.props.onChangeGradientType) this.props.onChangeGradientType(gradientType);
         }
+        rememberUsedColor (props = this.props) {
+            // Only record a color after the picker closes, not for every
+            // pointer movement inside the 2D saturation/value picker.
+            const color = props.colorIndex === 0 ? props.color : props.color2;
+            if (color) addColorHistory(color);
+        }
         handleCloseColor () {
             // If the eyedropper is currently being used, don't
             // close the color menu.
             if (this.props.isEyeDropping) return;
 
+            if (this._hasChanged) this.rememberUsedColor();
             // Otherwise, close the color menu and
             // also reset the color index to indicate
             // that `color1` is selected.

@@ -8,7 +8,7 @@ const StrokeToggle = ({checked, disabled, onChange}) => {
         <input
             aria-label={intl.formatMessage({
                 id: 'paint.paintEditor.strokeToggle',
-                defaultMessage: 'Hide outline'
+                defaultMessage: 'Show outline'
             })}
             checked={checked}
             className="stroke-toggle"
@@ -16,7 +16,7 @@ const StrokeToggle = ({checked, disabled, onChange}) => {
             onChange={event => onChange(event.target.checked)}
             title={intl.formatMessage({
                 id: 'paint.paintEditor.strokeToggleHint',
-                defaultMessage: 'Hide the outline while keeping its color and width'
+                defaultMessage: 'Show or hide the outline while keeping its color and width'
             })}
             type="checkbox"
         />

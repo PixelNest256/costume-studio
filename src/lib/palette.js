@@ -18,15 +18,36 @@ const toHex = ({r, g, b}) => `#${[r, g, b]
     .map(value => clamp(Math.round(value), 0, 255).toString(16).padStart(2, '0'))
     .join('')}`;
 
+// Mix in linear light rather than in sRGB (paint-like averaging). Averaging
+// sRGB values darkens saturated complementary colors; converting through
+// linear RGB keeps the result luminous, closer to mixing colored light.
+const srgbToLinear = value => {
+    const channel = value / 255;
+    return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+};
+
+const linearToSrgb = value => {
+    const channel = clamp(value, 0, 1);
+    const encoded = channel <= 0.0031308 ?
+        channel * 12.92 :
+        (1.055 * (channel ** (1 / 2.4))) - 0.055;
+    return clamp(encoded * 255, 0, 255);
+};
+
 export const mixColors = (a, b, ratio) => {
     const first = parseHex(a);
     const second = parseHex(b);
     if (!first || !second) return null;
     const t = clamp(Number(ratio) / 100, 0, 1);
+    const mixChannel = (left, right) => (
+        linearToSrgb(
+            (srgbToLinear(left) * (1 - t)) + (srgbToLinear(right) * t)
+        )
+    );
     return toHex({
-        r: first.r + (second.r - first.r) * t,
-        g: first.g + (second.g - first.g) * t,
-        b: first.b + (second.b - first.b) * t
+        r: mixChannel(first.r, second.r),
+        g: mixChannel(first.g, second.g),
+        b: mixChannel(first.b, second.b)
     });
 };
 

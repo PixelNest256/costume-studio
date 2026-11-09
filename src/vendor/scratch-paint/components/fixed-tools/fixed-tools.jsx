@@ -19,7 +19,7 @@ import Label from '../forms/label.jsx';
 import LabeledIconButton from '../labeled-icon-button/labeled-icon-button.jsx';
 import layout from '../../lib/layout-constants';
 import {hideLabel} from '../../lib/hide-label';
-import {formatShortcut, withShortcut} from '../../../../lib/shortcuts.js';
+import {withShortcut} from '../../../../lib/shortcuts.js';
 import styles from './fixed-tools.css';
 
 import cropIcon from './icons/crop.svg';
@@ -181,9 +181,8 @@ const FixedToolsComponent = props => {
                                 }
                             )
                         }
-                        data-shortcut={formatShortcut('Ctrl+Z')}
                         disabled={undoDisabled}
-                        title={withShortcut(intl.formatMessage(messages.undo), 'Ctrl+Z')}
+                        title={intl.formatMessage(messages.undo)}
                         onClick={props.onUndo}
                     >
                         <img
@@ -205,9 +204,8 @@ const FixedToolsComponent = props => {
                                 }
                             )
                         }
-                        data-shortcut={formatShortcut('Ctrl+Shift+Z')}
                         disabled={redoDisabled}
-                        title={withShortcut(intl.formatMessage(messages.redo), 'Ctrl+Shift+Z')}
+                        title={intl.formatMessage(messages.redo)}
                         onClick={props.onRedo}
                     >
                         <img

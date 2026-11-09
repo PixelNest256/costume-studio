@@ -1,5 +1,5 @@
 export const COLOR_HISTORY_STORAGE_KEY = 'costume-studio.color-history.v1';
-export const COLOR_HISTORY_LIMIT = 10;
+export const COLOR_HISTORY_LIMIT = 18;
 
 const normalize = value => {
     if (typeof value !== 'string') return null;

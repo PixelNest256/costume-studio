@@ -68,6 +68,12 @@ export const getSelectionStrokeDisabled = () => {
     return items.every(item => isStrokeDisabled(item));
 };
 
+export const getSelectionStrokeEnabled = () => {
+    const items = getSelectedLeafItems();
+    if (!items.length) return false;
+    return items.every(item => !isStrokeDisabled(item));
+};
+
 // Keep the saved payload current while the stroke is hidden. This is what
 // makes the checkbox reversible without changing the visible style controls.
 export const updateSavedStrokeColor = (item, colorString) => {

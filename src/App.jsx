@@ -31,6 +31,8 @@ import {downloadBlob, sanitizeFilename} from './lib/download.js';
 import {clearAutosave, hasBackup, loadBackups, saveBackup} from './lib/storage.js';
 import {convertCustomFontTextToPaths, embedCustomFontsInSvg} from './lib/custom-fonts.js';
 import {loadFeatureState, saveFeatureState} from './lib/features.js';
+import {changeFillColor} from './vendor/scratch-paint/reducers/fill-style.js';
+import {changeStrokeColor} from './vendor/scratch-paint/reducers/stroke-style.js';
 import {SAMPLE_NAME, SAMPLE_SVG} from './sample.js';
 
 const PUBLIC_REPOSITORY_URL = 'https://github.com/YOUR_NAME/costume-studio';
@@ -237,10 +239,17 @@ const App = () => {
     }, []);
 
     const handlePaletteApply = useCallback((color, target) => {
+        // Keep the active fill/stroke color in sync even when nothing is
+        // selected; the next drawing operation should use the chosen color.
+        if (target === 'stroke') {
+            dispatch(changeStrokeColor(color));
+        } else {
+            dispatch(changeFillColor(color));
+        }
         window.dispatchEvent(new CustomEvent('costume-studio:palette-apply', {
             detail: {color, target}
         }));
-    }, []);
+    }, [dispatch]);
 
     const handleUpdateImage = useCallback((isVector, image, rotationCenterX, rotationCenterY) => {
         if (isVector) {

@@ -42,12 +42,17 @@ class PaperCanvas extends React.Component {
             'recalibrateSize',
             'refreshBackdrop',
             'handleFeaturesChanged',
-            'handleViewChanged'
+            'handleViewChanged',
+            'handleMiddleMouseDown',
+            'handleMiddleMouseMove',
+            'handleMiddleMouseUp'
         ]);
         this._importGeneration = 0;
         this._isMounted = false;
         this._resizeFrame = null;
         this._resizeObserver = null;
+        this._middlePan = null;
+        this._middlePanCursor = '';
     }
     componentDidMount () {
         this._isMounted = true;
@@ -57,6 +62,7 @@ class PaperCanvas extends React.Component {
             this._resizeObserver.observe(this.canvas);
         }
         paper.view.on('resize', this.onViewResize);
+        window.addEventListener('mousedown', this.handleMiddleMouseDown, true);
         window.addEventListener('costume-studio:features-changed', this.handleFeaturesChanged);
         window.addEventListener('costume-studio:view-changed', this.handleViewChanged);
         resetZoom();
@@ -114,6 +120,8 @@ class PaperCanvas extends React.Component {
         }
         window.removeEventListener('costume-studio:features-changed', this.handleFeaturesChanged);
         window.removeEventListener('costume-studio:view-changed', this.handleViewChanged);
+        window.removeEventListener('mousedown', this.handleMiddleMouseDown, true);
+        this.stopMiddlePan();
         this.clearQueuedImport();
         // shouldZoomToFit means the zoom level hasn't been initialized yet
         if (!this.shouldZoomToFit) {
@@ -499,6 +507,44 @@ class PaperCanvas extends React.Component {
         if (!this._isMounted || !paper.view) return;
         refreshStageFrames();
         this.refreshBackdrop();
+    }
+    handleMiddleMouseDown (event) {
+        if (event.button !== 1 || !paper.view || !this.canvas || !this.canvas.contains(event.target)) return;
+        event.preventDefault();
+        event.stopPropagation();
+        this._middlePan = {x: event.clientX, y: event.clientY};
+        this._middlePanCursor = this.canvas.style.cursor;
+        this.canvas.style.cursor = 'grabbing';
+        window.addEventListener('mousemove', this.handleMiddleMouseMove, true);
+        window.addEventListener('mouseup', this.handleMiddleMouseUp, true);
+    }
+    handleMiddleMouseMove (event) {
+        if (!this._middlePan || !paper.view) return;
+        event.preventDefault();
+        const dx = event.clientX - this._middlePan.x;
+        const dy = event.clientY - this._middlePan.y;
+        this._middlePan.x = event.clientX;
+        this._middlePan.y = event.clientY;
+        const zoom = paper.view.zoom || 1;
+        paper.view.center = paper.view.center.add(
+            new paper.Point(-dx / zoom, -dy / zoom)
+        );
+        paper.view.update();
+        setWorkspaceBounds();
+        // Do not clamp immediately after changing the view center: Paper's
+        // view.bounds can still be one frame behind, which would snap the
+        // camera back to the previous position while dragging.
+        this.props.updateViewBounds(paper.view.matrix);
+    }
+    stopMiddlePan () {
+        if (!this._middlePan) return;
+        this._middlePan = null;
+        window.removeEventListener('mousemove', this.handleMiddleMouseMove, true);
+        window.removeEventListener('mouseup', this.handleMiddleMouseUp, true);
+        if (this.canvas) this.canvas.style.cursor = this._middlePanCursor || '';
+    }
+    handleMiddleMouseUp () {
+        this.stopMiddlePan();
     }
     setBackdrop (element) {
         this.backdrop = element;
