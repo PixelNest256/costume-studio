@@ -31,7 +31,13 @@ export const setStrokeDisabled = (item, disabled) => {
     if (!target.data) target.data = {};
     if (disabled) {
         if (target.data.strokeDisabled) return false;
-        rememberStroke(target);
+        // Snapshot the current style every time it is hidden. Reusing an old
+        // snapshot would restore a stale color/width after a hide-show-hide
+        // cycle, for example after the user changes the stroke in between.
+        target.data.strokeStyle = {
+            color: target.strokeColor || null,
+            width: Number(target.strokeWidth) || 0
+        };
         target.data.strokeDisabled = true;
         target.strokeColor = null;
         target.strokeWidth = 0;
