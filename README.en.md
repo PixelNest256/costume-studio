@@ -5,6 +5,8 @@ editor ([`@scratch/scratch-paint`](https://github.com/scratchfoundation/scratch-
 so you can edit and export costumes without a Scratch account or server. Everything
 runs in your browser.
 
+**Live site:** [https://pixelnest256.github.io/costume-studio/](https://pixelnest256.github.io/costume-studio/)
+
 ![Costume Studio screenshot](docs/screenshot-en.png)
 
 > **Unofficial project.** Not affiliated with, endorsed by, or sponsored by the

@@ -2,6 +2,8 @@
 
 Scratch のペイントエディター（[`@scratch/scratch-paint`](https://github.com/scratchfoundation/scratch-paint)）を、単体で使える Web アプリとして包んだ非公式のコスチューム編集ツールです。Scratch のアカウントやサーバーは不要で、画像はすべてブラウザ内で処理されます。
 
+**公開ページ:** [https://pixelnest256.github.io/costume-studio/](https://pixelnest256.github.io/costume-studio/)
+
 ![Costume Studio のスクリーンショット](docs/screenshot.png)
 
 > **非公式ツールです。** Scratch Foundation とは提携・承認関係にありません。Scratch は Scratch Foundation の商標です。詳しくは [TRADEMARK](TRADEMARK) を参照してください。
