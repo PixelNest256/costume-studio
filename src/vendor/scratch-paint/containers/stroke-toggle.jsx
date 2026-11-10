@@ -34,8 +34,8 @@ const StrokeToggle = ({disabled, onUpdateImage, selectedItems, setSelectedItems,
                 if (nextChecked) {
                     const saved = activeStrokeRef.current;
                     const nextColor = strokeColor || saved.color || '#000';
-                    const nextWidth = strokeWidth > 0 ? strokeWidth :
-                        (saved.width > 0 ? saved.width : 1);
+                    const nextWidth = (strokeColor && strokeWidth > 0) ? strokeWidth :
+                        (!strokeColor && saved.color && saved.width > 0 ? saved.width : 1);
                     onChangeStrokeColor(nextColor);
                     onChangeStrokeWidth(nextWidth);
                 } else {
