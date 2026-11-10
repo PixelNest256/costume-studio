@@ -68,10 +68,56 @@ export const getSelectionStrokeDisabled = () => {
     return items.every(item => isStrokeDisabled(item));
 };
 
+export const hasVisibleStroke = item => {
+    const target = targetItem(item);
+    return Boolean(target &&
+        !isStrokeDisabled(target) &&
+        target.strokeColor &&
+        target.strokeColor.alpha !== 0 &&
+        Number(target.strokeWidth) > 0);
+};
+
 export const getSelectionStrokeEnabled = () => {
     const items = getSelectedLeafItems();
     if (!items.length) return false;
-    return items.every(item => !isStrokeDisabled(item));
+    // An unchecked item is not merely one with strokeDisabled; it also
+    // includes newly created/imported artwork that has no visible stroke yet.
+    return items.every(item => hasVisibleStroke(item));
+};
+
+export const enableStrokeForSelection = () => {
+    const items = getSelectedLeafItems();
+    let changed = false;
+    for (const item of items) {
+        const target = targetItem(item);
+        if (!target) continue;
+        if (!target.data) target.data = {};
+
+        if (target.data.strokeDisabled) {
+            const saved = target.data.strokeStyle;
+            const savedColor = saved && saved.color;
+            const savedWidth = saved && Number(saved.width);
+            target.strokeColor = savedColor && savedColor.alpha !== 0 ? savedColor : '#000';
+            target.strokeWidth = savedWidth > 0 ? savedWidth : 1;
+            delete target.data.strokeDisabled;
+            changed = true;
+            continue;
+        }
+
+        let color = target.strokeColor;
+        let width = Number(target.strokeWidth) || 0;
+        if (!color || color.alpha === 0) {
+            color = '#000';
+            width = 1;
+            changed = true;
+        } else if (width <= 0) {
+            width = 1;
+            changed = true;
+        }
+        target.strokeColor = color;
+        target.strokeWidth = width;
+    }
+    return changed;
 };
 
 // Keep the saved payload current while the stroke is hidden. This is what

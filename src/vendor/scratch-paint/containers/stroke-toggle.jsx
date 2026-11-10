@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 
 import StrokeToggleComponent from '../components/stroke-toggle.jsx';
 import {getSelectedLeafItems} from '../helper/selection';
-import {getSelectionStrokeEnabled, setStrokeDisabledForSelection} from '../helper/stroke-state';
+import {enableStrokeForSelection, getSelectionStrokeEnabled, setStrokeDisabledForSelection} from '../helper/stroke-state';
 import {setSelectedItems as setSelectedItemsAction} from '../reducers/selected-items';
 import {changeStrokeColor} from '../reducers/stroke-style';
 import {changeStrokeWidth} from '../reducers/stroke-width';
@@ -12,7 +12,7 @@ import {changeStrokeWidth} from '../reducers/stroke-width';
 const StrokeToggle = ({disabled, onUpdateImage, selectedItems, setSelectedItems, strokeColor, strokeWidth,
     onChangeStrokeColor, onChangeStrokeWidth}) => {
     const hasSelection = selectedItems.length > 0;
-    const checked = hasSelection ? getSelectionStrokeEnabled() : Boolean(strokeColor);
+    const checked = hasSelection ? getSelectionStrokeEnabled() : Boolean(strokeColor && strokeWidth > 0);
     const activeStrokeRef = React.useRef({color: strokeColor, width: strokeWidth});
     return (
         <StrokeToggleComponent
@@ -20,7 +20,10 @@ const StrokeToggle = ({disabled, onUpdateImage, selectedItems, setSelectedItems,
             disabled={disabled}
             onChange={nextChecked => {
                 if (hasSelection) {
-                    if (!setStrokeDisabledForSelection(!nextChecked)) return;
+                    const changed = nextChecked ?
+                        enableStrokeForSelection() :
+                        setStrokeDisabledForSelection(true);
+                    if (!changed) return;
                     setSelectedItems();
                     onUpdateImage();
                     return;
@@ -30,8 +33,11 @@ const StrokeToggle = ({disabled, onUpdateImage, selectedItems, setSelectedItems,
                 // stroke color used by the next drawing operation.
                 if (nextChecked) {
                     const saved = activeStrokeRef.current;
-                    onChangeStrokeColor(saved.color || '#000');
-                    onChangeStrokeWidth(saved.width || 4);
+                    const nextColor = strokeColor || saved.color || '#000';
+                    const nextWidth = strokeWidth > 0 ? strokeWidth :
+                        (saved.width > 0 ? saved.width : 1);
+                    onChangeStrokeColor(nextColor);
+                    onChangeStrokeWidth(nextWidth);
                 } else {
                     activeStrokeRef.current = {
                         color: strokeColor || '#000',
