@@ -11,6 +11,7 @@ import {
     applyColorToSelection, applyStrokeWidthToSelection, getColorsFromSelection, MIXED
 } from '../helper/style-path';
 import GradientTypes from '../lib/gradient-types';
+import {getSelectionStrokeDisabled} from '../helper/stroke-state';
 import Modes from '../lib/modes';
 import Formats, {isBitmap} from '../lib/format';
 
@@ -67,7 +68,10 @@ class StrokeWidthIndicator extends React.Component {
 const mapStateToProps = state => ({
     disabled: state.scratchPaint.mode === Modes.BRUSH ||
         state.scratchPaint.mode === Modes.TEXT ||
-        state.scratchPaint.mode === Modes.FILL,
+        state.scratchPaint.mode === Modes.FILL ||
+        getSelectionStrokeDisabled() ||
+        (!state.scratchPaint.selectedItems.length &&
+            state.scratchPaint.color.strokeVisible === false),
     format: state.scratchPaint.format,
     strokeWidth: state.scratchPaint.color.strokeWidth,
     textEditTarget: state.scratchPaint.textEditTarget

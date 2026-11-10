@@ -4,6 +4,7 @@ import {defineMessages} from 'react-intl';
 import {changeColorIndex} from '../reducers/color-index';
 import {changeStrokeColor, changeStrokeColor2, changeStrokeGradientType} from '../reducers/stroke-style';
 import {changeStrokeWidth} from '../reducers/stroke-width';
+import {getSelectionStrokeDisabled} from '../helper/stroke-state';
 import {openStrokeColor, closeStrokeColor} from '../reducers/modals';
 import {getSelectedLeafItems} from '../helper/selection';
 import {setSelectedItems} from '../reducers/selected-items';
@@ -26,7 +27,10 @@ const mapStateToProps = state => ({
     colorIndex: state.scratchPaint.fillMode.colorIndex,
     disabled: state.scratchPaint.mode === Modes.BRUSH ||
         state.scratchPaint.mode === Modes.TEXT ||
-        state.scratchPaint.mode === Modes.FILL,
+        state.scratchPaint.mode === Modes.FILL ||
+        getSelectionStrokeDisabled() ||
+        (!state.scratchPaint.selectedItems.length &&
+            state.scratchPaint.color.strokeVisible === false),
     color: state.scratchPaint.color.strokeColor.primary,
     color2: state.scratchPaint.color.strokeColor.secondary,
     fillBitmapShapes: state.scratchPaint.fillBitmapShapes,
