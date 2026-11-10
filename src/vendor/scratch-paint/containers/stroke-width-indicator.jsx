@@ -7,7 +7,6 @@ import {changeStrokeColor, changeStrokeColor2, changeStrokeGradientType} from '.
 import {changeStrokeWidth} from '../reducers/stroke-width';
 import StrokeWidthIndicatorComponent from '../components/stroke-width-indicator.jsx';
 import {getSelectedLeafItems} from '../helper/selection';
-import {getSelectionStrokeDisabled} from '../helper/stroke-state';
 import {
     applyColorToSelection, applyStrokeWidthToSelection, getColorsFromSelection, MIXED
 } from '../helper/style-path';
@@ -68,10 +67,7 @@ class StrokeWidthIndicator extends React.Component {
 const mapStateToProps = state => ({
     disabled: state.scratchPaint.mode === Modes.BRUSH ||
         state.scratchPaint.mode === Modes.TEXT ||
-        state.scratchPaint.mode === Modes.FILL ||
-        getSelectionStrokeDisabled() ||
-        (!state.scratchPaint.selectedItems.length &&
-            state.scratchPaint.color.strokeColor.primary === null),
+        state.scratchPaint.mode === Modes.FILL,
     format: state.scratchPaint.format,
     strokeWidth: state.scratchPaint.color.strokeWidth,
     textEditTarget: state.scratchPaint.textEditTarget

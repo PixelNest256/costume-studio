@@ -1,4 +1,5 @@
 import paper from '@scratch/paper';
+import {getToolColorState} from '../helper/tool-color-state';
 import PropTypes from 'prop-types';
 import React from 'react';
 import {connect} from 'react-redux';
@@ -174,7 +175,7 @@ TextMode.propTypes = {
 };
 
 const mapStateToProps = (state, ownProps) => ({
-    colorState: state.scratchPaint.color,
+    colorState: getToolColorState(state.scratchPaint.color),
     font: state.scratchPaint.font,
     isTextModeActive: ownProps.isBitmap ?
         state.scratchPaint.mode === Modes.BIT_TEXT :

@@ -1,4 +1,5 @@
 import PropTypes from 'prop-types';
+import {getToolColorState} from '../helper/tool-color-state';
 import React from 'react';
 import {connect} from 'react-redux';
 import bindAll from 'lodash.bindall';
@@ -102,7 +103,7 @@ BrushMode.propTypes = {
 
 const mapStateToProps = state => ({
     brushModeState: state.scratchPaint.brushMode,
-    colorState: state.scratchPaint.color,
+    colorState: getToolColorState(state.scratchPaint.color),
     isBrushModeActive: state.scratchPaint.mode === Modes.BRUSH
 });
 const mapDispatchToProps = dispatch => ({

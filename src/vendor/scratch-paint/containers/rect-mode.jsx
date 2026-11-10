@@ -1,4 +1,5 @@
 import paper from '@scratch/paper';
+import {getToolColorState} from '../helper/tool-color-state';
 import PropTypes from 'prop-types';
 import React from 'react';
 import {connect} from 'react-redux';
@@ -158,7 +159,7 @@ RectMode.propTypes = {
 };
 
 const mapStateToProps = state => ({
-    colorState: state.scratchPaint.color,
+    colorState: getToolColorState(state.scratchPaint.color),
     isRectModeActive: state.scratchPaint.mode === Modes.RECT,
     selectedItems: state.scratchPaint.selectedItems,
     roundedCornerSize: state.scratchPaint.rectMode.roundedCornerSize,

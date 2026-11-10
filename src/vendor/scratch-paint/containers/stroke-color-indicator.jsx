@@ -6,7 +6,6 @@ import {changeStrokeColor, changeStrokeColor2, changeStrokeGradientType} from '.
 import {changeStrokeWidth} from '../reducers/stroke-width';
 import {openStrokeColor, closeStrokeColor} from '../reducers/modals';
 import {getSelectedLeafItems} from '../helper/selection';
-import {getSelectionStrokeDisabled} from '../helper/stroke-state';
 import {setSelectedItems} from '../reducers/selected-items';
 import Modes, {GradientToolsModes} from '../lib/modes';
 import {isBitmap} from '../lib/format';
@@ -27,10 +26,7 @@ const mapStateToProps = state => ({
     colorIndex: state.scratchPaint.fillMode.colorIndex,
     disabled: state.scratchPaint.mode === Modes.BRUSH ||
         state.scratchPaint.mode === Modes.TEXT ||
-        state.scratchPaint.mode === Modes.FILL ||
-        getSelectionStrokeDisabled() ||
-        (!state.scratchPaint.selectedItems.length &&
-            state.scratchPaint.color.strokeColor.primary === null),
+        state.scratchPaint.mode === Modes.FILL,
     color: state.scratchPaint.color.strokeColor.primary,
     color2: state.scratchPaint.color.strokeColor.secondary,
     fillBitmapShapes: state.scratchPaint.fillBitmapShapes,

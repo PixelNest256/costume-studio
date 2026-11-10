@@ -1,4 +1,5 @@
 import PropTypes from 'prop-types';
+import {getToolColorState} from '../helper/tool-color-state';
 import React from 'react';
 import {connect} from 'react-redux';
 import bindAll from 'lodash.bindall';
@@ -105,7 +106,7 @@ PenMode.propTypes = {
 };
 
 const mapStateToProps = state => ({
-    colorState: state.scratchPaint.color,
+    colorState: getToolColorState(state.scratchPaint.color),
     isPenModeActive: state.scratchPaint.mode === Modes.PEN,
     simplifySize: state.scratchPaint.penMode.simplifySize
 });

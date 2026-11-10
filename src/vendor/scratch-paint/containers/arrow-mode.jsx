@@ -1,4 +1,5 @@
 import paper from '@scratch/paper';
+import {getToolColorState} from '../helper/tool-color-state';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -147,7 +148,7 @@ ArrowMode.propTypes = {
 };
 
 const mapStateToProps = state => ({
-    colorState: state.scratchPaint.color,
+    colorState: getToolColorState(state.scratchPaint.color),
     isArrowModeActive: state.scratchPaint.mode === Modes.ARROW,
     selectedItems: state.scratchPaint.selectedItems
 });

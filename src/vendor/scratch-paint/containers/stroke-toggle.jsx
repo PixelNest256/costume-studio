@@ -8,12 +8,13 @@ import {enableStrokeForSelection, getSelectionStrokeEnabled, setStrokeDisabledFo
 import {setSelectedItems as setSelectedItemsAction} from '../reducers/selected-items';
 import {changeStrokeColor} from '../reducers/stroke-style';
 import {changeStrokeWidth} from '../reducers/stroke-width';
+import {setStrokeVisible} from '../reducers/stroke-visible';
 
 const StrokeToggle = ({disabled, onUpdateImage, selectedItems, setSelectedItems, strokeColor, strokeWidth,
-    onChangeStrokeColor, onChangeStrokeWidth}) => {
+    strokeVisible, onChangeStrokeColor, onChangeStrokeWidth, onSetStrokeVisible}) => {
     const hasSelection = selectedItems.length > 0;
-    const checked = hasSelection ? getSelectionStrokeEnabled() : Boolean(strokeColor && strokeWidth > 0);
-    const activeStrokeRef = React.useRef({color: strokeColor, width: strokeWidth});
+    const checked = hasSelection ? getSelectionStrokeEnabled() :
+        Boolean(strokeVisible && strokeColor && strokeWidth > 0);
     return (
         <StrokeToggleComponent
             checked={checked}
@@ -24,26 +25,18 @@ const StrokeToggle = ({disabled, onUpdateImage, selectedItems, setSelectedItems,
                         enableStrokeForSelection() :
                         setStrokeDisabledForSelection(true);
                     if (!changed) return;
+                    onSetStrokeVisible(nextChecked);
                     setSelectedItems();
                     onUpdateImage();
                     return;
                 }
-                // With no object selected there is no item to hold the hidden
-                // style. Keep it in this component and toggle the active
-                // stroke color used by the next drawing operation.
+                // With no object selected, keep the active color and width
+                // intact. Only the visibility flag changes so the controls
+                // remain usable and the outline can be restored at any time.
+                onSetStrokeVisible(nextChecked);
                 if (nextChecked) {
-                    const saved = activeStrokeRef.current;
-                    const nextColor = strokeColor || saved.color || '#000';
-                    const nextWidth = (strokeColor && strokeWidth > 0) ? strokeWidth :
-                        (!strokeColor && saved.color && saved.width > 0 ? saved.width : 1);
-                    onChangeStrokeColor(nextColor);
-                    onChangeStrokeWidth(nextWidth);
-                } else {
-                    activeStrokeRef.current = {
-                        color: strokeColor || '#000',
-                        width: strokeWidth || 4
-                    };
-                    onChangeStrokeColor(null);
+                    if (!strokeColor) onChangeStrokeColor('#000');
+                    if (!(strokeWidth > 0)) onChangeStrokeWidth(1);
                 }
             }}
         />
@@ -57,14 +50,17 @@ StrokeToggle.propTypes = {
     setSelectedItems: PropTypes.func.isRequired,
     strokeColor: PropTypes.string,
     strokeWidth: PropTypes.number,
+    strokeVisible: PropTypes.bool,
     onChangeStrokeColor: PropTypes.func.isRequired,
-    onChangeStrokeWidth: PropTypes.func.isRequired
+    onChangeStrokeWidth: PropTypes.func.isRequired,
+    onSetStrokeVisible: PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
     selectedItems: state.scratchPaint.selectedItems || [],
     strokeColor: state.scratchPaint.color.strokeColor.primary,
-    strokeWidth: state.scratchPaint.color.strokeWidth
+    strokeWidth: state.scratchPaint.color.strokeWidth,
+    strokeVisible: state.scratchPaint.color.strokeVisible
 });
 const mapDispatchToProps = dispatch => ({
     setSelectedItems: () => {
@@ -75,6 +71,9 @@ const mapDispatchToProps = dispatch => ({
     },
     onChangeStrokeWidth: width => {
         dispatch(changeStrokeWidth(width));
+    },
+    onSetStrokeVisible: visible => {
+        dispatch(setStrokeVisible(visible));
     }
 });
 

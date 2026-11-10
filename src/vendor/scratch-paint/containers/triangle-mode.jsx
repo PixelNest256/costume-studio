@@ -1,4 +1,5 @@
 import paper from '@scratch/paper';
+import {getToolColorState} from '../helper/tool-color-state';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -167,7 +168,7 @@ TriangleMode.propTypes = {
 };
 
 const mapStateToProps = state => ({
-    colorState: state.scratchPaint.color,
+    colorState: getToolColorState(state.scratchPaint.color),
     isTriangleModeActive: state.scratchPaint.mode === Modes.TRIANGLE,
     selectedItems: state.scratchPaint.selectedItems,
     sideCount: state.scratchPaint.triangleMode.trianglePolyCount,
