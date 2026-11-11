@@ -96,19 +96,12 @@ class BoundingBoxTool {
         };
         if (this.mode === BoundingBoxModes.MOVE) {
             this._modeMap[this.mode].onMouseDown(hitProperties);
-            // Fix: when starting a drag on an unselected item, the previous
-            // bounds path was removed by clearSelection, so MoveTool captured
-            // selectedItems without the bounds path and the blue outline did
-            // not follow the drag. Recreate bounds immediately and attach
-            // them to the move tool so they move together with the selection.
-            if (!this.boundsPath) {
-                this.setSelectionBounds();
-                const moveTool = this._modeMap[this.mode];
-                if (this.boundsPath && moveTool.selectedItems &&
-                    !moveTool.selectedItems.includes(this.boundsPath)) {
-                    moveTool.selectedItems.push(this.boundsPath);
-                }
-            }
+            // Selecting a different object during mouse down updates Redux
+            // asynchronously. Recreate the bounds for the current selection
+            // and attach the new bounds path to the active drag, otherwise
+            // the object moves while its blue outline stays behind.
+            this.setSelectionBounds();
+            this._attachBoundsPathToMoveTool();
             this.removeBoundsHandles();
         } else if (this.mode === BoundingBoxModes.SCALE) {
             this._modeMap[this.mode].onMouseDown(hitResult, this.boundsPath, getSelectedRootItems());
@@ -327,6 +320,25 @@ class BoundingBoxTool {
         }
         // Remove the template
         boundsScaleHandle.remove();
+        this._attachBoundsPathToMoveTool();
+    }
+    _attachBoundsPathToMoveTool () {
+        const moveTool = this._modeMap[BoundingBoxModes.MOVE];
+        if (this.mode !== BoundingBoxModes.MOVE || !this.boundsPath ||
+                !moveTool || !moveTool.selectedItems) {
+            return;
+        }
+        // Replace any stale selection guide left over from the previous
+        // selection with the guide created for the current one.
+        moveTool.selectedItems = moveTool.selectedItems.filter(item =>
+            item === this.boundsPath || !(item.data && item.data.isSelectionBound));
+        if (!moveTool.selectedItems.includes(this.boundsPath)) {
+            moveTool.selectedItems.push(this.boundsPath);
+        }
+        // Scale/rotate handles are separate guide items. If the selection
+        // changes after the drag started, setSelectionBounds() recreates
+        // them at the old position; hide them for the rest of the move.
+        this.removeBoundsHandles();
     }
     removeBoundsPath () {
         removeBoundsPath();
