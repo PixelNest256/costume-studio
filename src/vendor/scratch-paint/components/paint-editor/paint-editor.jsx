@@ -35,6 +35,7 @@ import ArrowMode from '../../containers/arrow-mode.jsx';
 import RectMode from '../../containers/rect-mode.jsx';
 import ReshapeMode from '../../containers/reshape-mode.jsx';
 import SelectMode from '../../containers/select-mode.jsx';
+import EffectsMode from '../../containers/effects-mode.jsx';
 import PreciseTransformMode from '../../containers/precise-transform-mode.jsx';
 import PreciseTransformPanel from '../precise-transform-panel/precise-transform-panel.jsx';
 import StrokeColorIndicatorComponent from '../../containers/stroke-color-indicator.jsx';
@@ -201,6 +202,7 @@ const PaintEditorComponent = props => {
                         <SelectMode
                             onUpdateImage={props.onUpdateImage}
                         />
+                        <EffectsMode/>
                         <PreciseTransformMode/>
                         <ReshapeMode
                             onUpdateImage={props.onUpdateImage}

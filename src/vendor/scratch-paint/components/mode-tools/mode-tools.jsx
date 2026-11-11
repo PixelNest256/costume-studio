@@ -19,6 +19,7 @@ import { changeBitBrushSize } from '../../reducers/bit-brush-size';
 import { changeBitEraserSize } from '../../reducers/bit-eraser-size';
 import { setShapesFilled } from '../../reducers/fill-bitmap-shapes';
 import { setTextAlignment } from '../../reducers/text-alignment';
+import EffectsTools from './effects-tools.jsx';
 
 import FontDropdown from '../../containers/font-dropdown.jsx';
 import LiveInputHOC from '../forms/live-input-hoc.jsx';
@@ -725,6 +726,17 @@ const ModeToolsComponent = props => {
                             </Dropdown>
                         </InputGroup>
                     ) : null}
+                </div>
+            );
+        case Modes.EFFECTS:
+            return (
+                <div className={classNames(props.className, styles.modeTools)} ref={toolbarRef}>
+                    <EffectsTools
+                        disabled={!props.hasSelection}
+                        effect={props.effect}
+                        intl={props.intl}
+                        onChange={props.onEffectChange}
+                    />
                 </div>
             );
         case Modes.BIT_SELECT:

@@ -20,6 +20,7 @@ import {HANDLE_RATIO, ensureClockwise} from '../helper/math';
 import {groupItems, ungroupItems} from '../helper/group';
 import {getRaster} from '../helper/layer';
 import {getBuiltinOutline, getCustomFont} from '../../../lib/custom-fonts.js';
+import {applyEffectToSelection, getSelectionEffect} from '../helper/effects';
 import {flipBitmapHorizontal, flipBitmapVertical, selectAllBitmap} from '../helper/bitmap';
 import Formats, {isBitmap} from '../lib/format';
 import Modes from '../lib/modes';
@@ -34,6 +35,7 @@ class ModeTools extends React.Component {
             'hasSelectedUncurvedPoints',
             'hasSelectedUnpointedPoints',
             'handleCurvePoints',
+            'handleEffectChange',
             'handleFlipHorizontal',
             'handleFlipVertical',
             'handleCenterSelection',
@@ -96,6 +98,12 @@ class ModeTools extends React.Component {
     hasSelectedUnpointedPoints () {
         const points = this._getSelectedUnpointedPoints();
         return points.length > 0;
+    }
+    handleEffectChange (patch, commit = true) {
+        const effect = {...getSelectionEffect(), ...patch};
+        if (!applyEffectToSelection(effect)) return;
+        this.props.setSelectedItems(this.props.format);
+        if (commit) this.props.onUpdateImage();
     }
     handleCurvePoints () {
         let changed;
@@ -540,6 +548,9 @@ class ModeTools extends React.Component {
                 hasSelectedUncurvedPoints={this.hasSelectedUncurvedPoints()}
                 hasSelectedUnpointedPoints={this.hasSelectedUnpointedPoints()}
                 hasSelectedText={getSelectedLeafItems().some(item => item instanceof paper.PointText)}
+                hasSelection={getSelectedRootItems().length > 0}
+                effect={getSelectionEffect()}
+                onEffectChange={this.handleEffectChange}
                 onCopyToClipboard={this.props.onCopyToClipboard}
                 onCutToClipboard={this.props.onCutToClipboard}
                 onCurvePoints={this.handleCurvePoints}
@@ -583,6 +594,16 @@ ModeTools.propTypes = {
     onConvertTextToPaths: PropTypes.func,
     onPasteFromClipboard: PropTypes.func.isRequired,
     onUpdateImage: PropTypes.func.isRequired,
+    effect: PropTypes.shape({
+        type: PropTypes.string,
+        blur: PropTypes.number,
+        offsetX: PropTypes.number,
+        offsetY: PropTypes.number,
+        color: PropTypes.string,
+        opacity: PropTypes.number
+    }),
+    hasSelection: PropTypes.bool,
+    onEffectChange: PropTypes.func.isRequired,
     width: PropTypes.number,
     height: PropTypes.number,
     // Listen on selected items to update hasSelectedPoints

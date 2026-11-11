@@ -98,7 +98,8 @@ SelectMode.propTypes = {
 const mapStateToProps = state => ({
     isNormalSelectModeActive: state.scratchPaint.mode === Modes.SELECT,
     isSelectModeActive: state.scratchPaint.mode === Modes.SELECT ||
-        state.scratchPaint.mode === Modes.PRECISE_TRANSFORM,
+        state.scratchPaint.mode === Modes.PRECISE_TRANSFORM ||
+        state.scratchPaint.mode === Modes.EFFECTS,
     hoveredItemId: state.scratchPaint.hoveredItemId,
     selectedItems: state.scratchPaint.selectedItems
 });

@@ -7,6 +7,7 @@ const vectorModesObj = {
     FILL: null,
     SELECT: null,
     PRECISE_TRANSFORM: null,
+    EFFECTS: null,
     RESHAPE: null,
     OVAL: null,
     RECT: null,

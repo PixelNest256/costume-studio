@@ -14,6 +14,7 @@ import {getSelectedLeafItems} from '../helper/selection';
 import {getRaster, hideGuideLayers, showGuideLayers} from '../helper/layer';
 import {commitRectToBitmap, commitOvalToBitmap, commitSelectionToBitmap, getHitBounds} from '../helper/bitmap';
 import {performSnapshot} from '../helper/undo';
+import {applyEffectsToSvg} from '../helper/effects';
 import {scaleWithStrokes} from '../helper/math';
 
 import {
@@ -142,13 +143,14 @@ const UpdateImageHOC = function (WrappedComponent) {
             const centerX = bounds.width === 0 ? 0 : (SVG_ART_BOARD_WIDTH / 2) - bounds.x;
             const centerY = bounds.height === 0 ? 0 : (SVG_ART_BOARD_HEIGHT / 2) - bounds.y;
 
+            const exportedSvg = paper.project.exportSVG({
+                asString: true,
+                bounds: 'content',
+                matrix: new paper.Matrix().translate(-bounds.x, -bounds.y)
+            });
             this.props.onUpdateImage(
                 true /* isVector */,
-                paper.project.exportSVG({
-                    asString: true,
-                    bounds: 'content',
-                    matrix: new paper.Matrix().translate(-bounds.x, -bounds.y)
-                }),
+                applyEffectsToSvg(exportedSvg, 0.5),
                 centerX,
                 centerY);
             scaleWithStrokes(paper.project.activeLayer, 2, new paper.Point());

@@ -51,6 +51,11 @@ const messages = defineMessages({
         description: 'Tool for precise numeric object transforms',
         id: 'paint.preciseTransformMode.preciseTransform'
     },
+    effects: {
+        defaultMessage: 'Effects',
+        description: 'Tool for applying blur, shadow and glow to objects',
+        id: 'paint.effectsMode.effects'
+    },
     text: {
         defaultMessage: 'Text',
         description: 'Label for the text tool',

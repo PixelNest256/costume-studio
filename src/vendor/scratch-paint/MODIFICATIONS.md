@@ -30,7 +30,9 @@ Modification date: 2026-11-11.
   `better-img-uploads` and `fix-uploaded-svgs` (see `src/lib/files.js`).
 - Additional local changes for Costume Studio: text-to-path handling,
   text-on-path snapping and detachment (`helper/path-text.js` and the
-  move-tool integration), editor range/stage options, stroke toggling,
+  move-tool integration), object effects (blur/shadow/glow via canvas and
+  SVG filters, using the standard Scratch color picker), editor
+  range/stage options, stroke toggling,
   keyboard shortcuts, custom fonts, color history, and the color palette
   panel.
 
