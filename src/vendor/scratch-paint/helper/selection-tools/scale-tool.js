@@ -2,6 +2,13 @@ import paper from '@scratch/paper';
 import {getItems} from '../selection';
 import {getActionBounds} from '../view';
 import {BitmapModes} from '../../lib/modes';
+import {SNAP_THRESHOLD} from '../snap-settings';
+import {
+    createScaleSnapTargets,
+    getScaleSnapAdjustment,
+    getScaleSnapSettings,
+    ScaleSnapGuides
+} from './scale-snap';
 
 const MIN_SCALE_FACTOR = 0.0001;
 
@@ -28,6 +35,7 @@ class ScaleTool {
         this.itemToInsertBelow = null;
         this.lastPoint = null;
         this.onUpdateImage = onUpdateImage;
+        this._snapGuides = new ScaleSnapGuides();
     }
 
     /**
@@ -38,6 +46,7 @@ class ScaleTool {
     onMouseDown (hitResult, boundsPath, selectedItems) {
         if (this.active) return;
         this.active = true;
+        this._snapGuides.clear();
 
         const index = hitResult.item.data.index;
         this.pivot = boundsPath.bounds[this._getOpposingRectCornerNameByIndex(index)].clone();
@@ -116,6 +125,33 @@ class ScaleTool {
             sy = size.y / this.origSize.y;
         }
 
+        const snapSettings = getScaleSnapSettings(event);
+        let snapAdjustment = null;
+        if (snapSettings) {
+            const paintLayer = paper.project.getItem({data: {isPaintingLayer: true}});
+            const targets = createScaleSnapTargets(
+                paintLayer ? paintLayer.children : [],
+                snapSettings
+            );
+            snapAdjustment = getScaleSnapAdjustment({
+                sx,
+                sy,
+                origSize: this.origSize,
+                pivot: this.pivot,
+                corner: this.corner,
+                width: Math.abs(size.x),
+                height: Math.abs(size.y),
+                alt: event.modifiers.alt,
+                isCorner: this.isCorner,
+                targets,
+                threshold: SNAP_THRESHOLD / paper.view.zoom
+            });
+            sx = snapAdjustment.sx;
+            sy = snapAdjustment.sy;
+        }
+        const snappedSx = sx;
+        const snappedSy = sy;
+
         const signx = sx > 0 ? 1 : -1;
         const signy = sy > 0 ? 1 : -1;
         if (this.isCorner && !event.modifiers.shift) {
@@ -129,11 +165,24 @@ class ScaleTool {
         if (this.selectionAnchor) {
             this.selectionAnchor.scale(this.lastSx / sx, this.lastSy / sy);
         }
+
+        this._snapGuides.clear();
+        if (snapAdjustment) {
+            const x = snapAdjustment.x &&
+                Math.abs(Math.abs(sx) - Math.abs(snappedSx)) < 1e-6 ? snapAdjustment.x : null;
+            const y = snapAdjustment.y &&
+                Math.abs(Math.abs(sy) - Math.abs(snappedSy)) < 1e-6 ? snapAdjustment.y : null;
+            if (x || y) {
+                this._snapGuides.show(x, y, this.itemGroup.bounds, bounds);
+            }
+        }
+
         this.lastSx = sx;
         this.lastSy = sy;
     }
     onMouseUp () {
         if (!this.active) return;
+        this._snapGuides.clear();
         this.lastPoint = null;
 
         this.pivot = null;

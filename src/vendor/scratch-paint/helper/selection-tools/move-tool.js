@@ -9,52 +9,14 @@ import {
 } from '../selection';
 import {getDragCrosshairLayer, getGuideLayer, CROSSHAIR_FULL_OPACITY} from '../layer';
 import {createPathText, findPathTextTarget, layoutPathText} from '../path-text';
+import {SNAP_GUIDE_COLOR, SNAP_THRESHOLD, loadSnapSettings} from '../snap-settings';
 
 // Snap behavior independently implemented in this file. Initial defaults are
 // based on Paint-snap's documented editor behavior (page/object guides, threshold 10); no addon source is bundled.
-const SNAP_THRESHOLD = 10;
-const SNAP_GUIDE_COLOR = '#ff0000';
 const FADE_DISTANCE = 10;
 const PATH_TEXT_THRESHOLD = 24;
 const PATH_TEXT_DETACH_THRESHOLD = 48;
 const PATH_TEXT_REARM_THRESHOLD = PATH_TEXT_THRESHOLD * 1.5;
-
-// Settings are stored by the app's Features menu. Defaults correspond to the
-// documented initial snap targets; per-addon code is not used at runtime.
-const SNAP_DEFAULTS = {
-    snap: true,
-    snapPageCenter: true,
-    snapPageAxes: true,
-    snapPageEdges: true,
-    snapPageCorners: false,
-    snapObjectEdges: true,
-    snapObjectCenters: true,
-    snapObjectMidlines: true,
-    snapObjectCorners: false,
-    snapBoxCenter: true,
-    snapBoxCorners: false,
-    snapBoxEdgeMids: false,
-    snapCtrlDisable: true,
-    snapTextToPath: false
-};
-
-const loadSnapSettings = () => {
-    const settings = {...SNAP_DEFAULTS};
-    try {
-        const raw = window.localStorage.getItem('costume-studio.features.v1');
-        if (raw) {
-            const data = JSON.parse(raw);
-            if (data && data.enabled) {
-                for (const key of Object.keys(SNAP_DEFAULTS)) {
-                    if (typeof data.enabled[key] === 'boolean') settings[key] = data.enabled[key];
-                }
-            }
-        }
-    } catch (error) {
-        // ignore
-    }
-    return settings;
-};
 
 const createSnapPoints = (selectionBounds, objects, settings) => {
     const fromPoints = {};

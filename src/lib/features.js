@@ -148,7 +148,7 @@ export const saveFeatureState = state => {
     }
 };
 
-// Read by vendor move-tool (paint-snap) on every drag, so the toggle takes
+// Read by the vendor move and scale tools on every drag, so the toggle takes
 // effect without a reload. Defaults to on when unset.
 export const isSnapEnabled = () => {
     try {
