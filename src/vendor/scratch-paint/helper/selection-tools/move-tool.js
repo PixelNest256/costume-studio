@@ -8,12 +8,16 @@ import {
     clearSelection, cloneSelection, getSelectedLeafItems, getSelectedRootItems, setItemSelection
 } from '../selection';
 import {getDragCrosshairLayer, getGuideLayer, CROSSHAIR_FULL_OPACITY} from '../layer';
+import {createPathText, findPathTextTarget, layoutPathText} from '../path-text';
 
 // Snap behavior independently implemented in this file. Initial defaults are
 // based on Paint-snap's documented editor behavior (page/object guides, threshold 10); no addon source is bundled.
 const SNAP_THRESHOLD = 10;
 const SNAP_GUIDE_COLOR = '#ff0000';
 const FADE_DISTANCE = 10;
+const PATH_TEXT_THRESHOLD = 24;
+const PATH_TEXT_DETACH_THRESHOLD = 48;
+const PATH_TEXT_REARM_THRESHOLD = PATH_TEXT_THRESHOLD * 1.5;
 
 // Settings are stored by the app's Features menu. Defaults correspond to the
 // documented initial snap targets; per-addon code is not used at runtime.
@@ -30,7 +34,8 @@ const SNAP_DEFAULTS = {
     snapBoxCenter: true,
     snapBoxCorners: false,
     snapBoxEdgeMids: false,
-    snapCtrlDisable: true
+    snapCtrlDisable: true,
+    snapTextToPath: false
 };
 
 const loadSnapSettings = () => {
@@ -142,6 +147,9 @@ class MoveTool {
         this.switchToTextTool = switchToTextTool;
         this.boundsPath = null;
         this.firstDrag = false;
+        this._pathText = null;
+        this._pathTextArmed = true;
+        this._pathTextDetachedPath = null;
     }
 
     /**
@@ -204,6 +212,8 @@ class MoveTool {
         }
 
         this.firstDrag = true;
+        this._pathTextArmed = true;
+        this._pathTextDetachedPath = null;
     }
     setBoundsPath (boundsPath) {
         this.boundsPath = boundsPath;
@@ -253,7 +263,113 @@ class MoveTool {
             (event.modifiers.control || event.modifiers.meta ||
                 nativeEvent.ctrlKey || nativeEvent.metaKey);
         this._removeSnapGuides();
-        if (snapSettings.snap && !ctrlDisablesSnap && !event.modifiers.shift && this.mode !== Modes.RESHAPE && this.selectionCenter) {
+
+        // Leaving the curve: once a text has been snapped to a path, dragging
+        // far away or pressing Ctrl/Meta must release it. Without this the
+        // text would stay glued to the curve for the rest of the drag.
+        let pathDistance = Infinity;
+        if (this._pathText && this._pathText.path &&
+                this._pathText.path.getNearestLocation) {
+            const nearest = this._pathText.path.getNearestLocation(point);
+            if (nearest) pathDistance = nearest.getPoint().getDistance(point);
+        }
+        const cancelPathText = event.modifiers.control || event.modifiers.meta ||
+            (nativeEvent && (nativeEvent.ctrlKey || nativeEvent.metaKey));
+        if (this._pathText && (cancelPathText ||
+                pathDistance > PATH_TEXT_DETACH_THRESHOLD / paper.view.zoom)) {
+            this._detachPathText(point, dragVector, pathDistance);
+        }
+
+        // After detaching, wait until the pointer has moved clearly away from
+        // the old curve before arming snapping again. This prevents an
+        // immediate re-snap after a Ctrl-release while still on the line,
+        // while still allowing a deliberate re-approach later in the drag.
+        if (!this._pathText && !this._pathTextArmed && this._pathTextDetachedPath &&
+                this._pathTextDetachedPath.getNearestLocation) {
+            const nearest = this._pathTextDetachedPath.getNearestLocation(point);
+            if (nearest && nearest.getPoint().getDistance(point) >
+                    PATH_TEXT_REARM_THRESHOLD / paper.view.zoom) {
+                this._pathTextArmed = true;
+                this._pathTextDetachedPath = null;
+            }
+        }
+
+        // Path text is an opt-in extension of the existing snap feature. It
+        // uses the mouse position to find a nearby stroked path, then lays the
+        // selected text out one glyph at a time along that path.
+        let pathTextHandled = false;
+        // The bounding-box helper is kept in selectedItems while dragging.
+        // Look only at the actual selected content for path text.
+        const contentItems = (this.selectedItems || []).filter(item =>
+            item !== this.boundsPath && !(item.data && item.data.isHelperItem));
+        const selectedText = contentItems.length === 1 && contentItems[0] instanceof paper.PointText ?
+            contentItems[0] : null;
+        const canPathText = snapSettings.snap && snapSettings.snapTextToPath &&
+            !ctrlDisablesSnap && this._pathTextArmed && !event.modifiers.shift &&
+            this.mode !== Modes.RESHAPE && selectedText;
+        if (canPathText || this._pathText) {
+            let pathTarget = findPathTextTarget(
+                point,
+                contentItems,
+                PATH_TEXT_THRESHOLD / paper.view.zoom
+            );
+            // Once path text is active, keep following the current path even
+            // when the pointer drifts slightly off the line. The nearest
+            // location still gives a stable, continuous start point.
+            if (!pathTarget && this._pathText && this._pathText.path &&
+                    this._pathText.path.getNearestLocation) {
+                const location = this._pathText.path.getNearestLocation(point);
+                if (location) {
+                    pathTarget = {
+                        path: this._pathText.path,
+                        offset: location.getOffset(),
+                        point: location.getPoint(),
+                        distance: location.getPoint().getDistance(point)
+                    };
+                }
+            }
+            if (pathTarget || this._pathText) {
+                if (!this._pathText) {
+                    // Keep a detached copy of the original text so leaving the
+                    // curve can restore the normal editable text.
+                    const original = selectedText.clone({insert: false});
+                    original.matrix = selectedText.matrix.clone();
+                    const originalCenter = selectedText.position.clone();
+                    const conversionPoint = point.clone();
+                    const group = createPathText(selectedText);
+                    if (group) {
+                        this._pathText = {
+                            group,
+                            original,
+                            originalMatrix: original.matrix.clone(),
+                            originalCenter,
+                            conversionPoint
+                        };
+                        this.selectedItems = [group];
+                        this._selectionBounds = group.bounds;
+                        this.selectionCenter = group.bounds.center;
+                        setItemSelection(group, true);
+                        this.setSelectedItems();
+                    }
+                }
+                if (this._pathText) {
+                    if (pathTarget) {
+                        this._pathText.path = pathTarget.path;
+                        this._pathText.offset = pathTarget.offset;
+                    }
+                    if (this._pathText.path) {
+                        const offset = pathTarget ? pathTarget.offset : (this._pathText.offset || 0);
+                        layoutPathText(this._pathText.group, this._pathText.path, offset);
+                        this._selectionBounds = this._pathText.group.bounds;
+                        this.selectionCenter = this._selectionBounds.center;
+                        if (pathTarget) this._showPathTextGuide(pathTarget.path, pathTarget.point);
+                    }
+                    pathTextHandled = true;
+                }
+            }
+        }
+
+        if (!pathTextHandled && snapSettings.snap && !ctrlDisablesSnap && !event.modifiers.shift && this.mode !== Modes.RESHAPE && this.selectionCenter) {
             const scaledThreshold = SNAP_THRESHOLD / paper.view.zoom;
             const selectionBounds = this._selectionBounds || (() => {
                 let b = null;
@@ -307,25 +423,31 @@ class MoveTool {
         }
 
         let bounds;
-        for (const item of this.selectedItems) {
-            // add the position of the item before the drag started
-            // for later use in the snap calculation
-            if (!item.data.origPos) {
-                item.data.origPos = item.position;
-            }
+        if (pathTextHandled && this._pathText) {
+            // Path text glyphs already have absolute positions. Do not apply
+            // the generic drag translation to their group.
+            bounds = this._pathText.group.bounds;
+        } else {
+            for (const item of this.selectedItems) {
+                // add the position of the item before the drag started
+                // for later use in the snap calculation
+                if (!item.data.origPos) {
+                    item.data.origPos = item.position;
+                }
 
-            if (snapVector) {
-                item.position = item.data.origPos.add(snapVector);
-            } else if (event.modifiers.shift) {
-                item.position = item.data.origPos.add(snapDeltaToAngle(dragVector, Math.PI / 4));
-            } else {
-                item.position = item.data.origPos.add(dragVector);
-            }
+                if (snapVector) {
+                    item.position = item.data.origPos.add(snapVector);
+                } else if (event.modifiers.shift) {
+                    item.position = item.data.origPos.add(snapDeltaToAngle(dragVector, Math.PI / 4));
+                } else {
+                    item.position = item.data.origPos.add(dragVector);
+                }
 
-            if (bounds) {
-                bounds = bounds.unite(item.bounds);
-            } else {
-                bounds = item.bounds;
+                if (bounds) {
+                    bounds = bounds.unite(item.bounds);
+                } else {
+                    bounds = item.bounds;
+                }
             }
         }
 
@@ -361,6 +483,38 @@ class MoveTool {
         } // else the rotation center is within selection bounds, always show drag crosshair at full opacity
         getDragCrosshairLayer().opacity = CROSSHAIR_FULL_OPACITY * opacityMultiplier;
     }
+    _detachPathText (point, dragVector, pathDistance) {
+        const pathText = this._pathText;
+        if (!pathText) return;
+        this._pathText = null;
+        this._pathTextDetachedPath = pathText.path || null;
+        // A far drag has already left the re-arm zone; a Ctrl detach near the
+        // line waits until the pointer moves away.
+        this._pathTextArmed = pathDistance >
+            PATH_TEXT_REARM_THRESHOLD / paper.view.zoom;
+
+        const {group, original, originalMatrix, originalCenter, conversionPoint} = pathText;
+        const parent = group && group.parent;
+        const index = group && group.index;
+        if (group) {
+            if (group.selected) setItemSelection(group, false);
+            group.remove();
+        }
+        if (!original) return;
+
+        // Restore the normal PointText and put it where the pointer would have
+        // carried it since the moment it snapped to the curve.
+        original.matrix = originalMatrix.clone();
+        original.position = originalCenter.add(point.subtract(conversionPoint));
+        if (!original.data) original.data = {};
+        original.data.origPos = original.position.subtract(dragVector);
+        if (parent) parent.insertChild(index, original);
+        setItemSelection(original, true);
+        this.selectedItems = [original];
+        this._selectionBounds = original.bounds;
+        this.selectionCenter = this._selectionBounds.center;
+        this.setSelectedItems();
+    }
     _removeSnapGuides () {
         if (this._snapGuideLine) {
             this._snapGuideLine.remove();
@@ -370,6 +524,37 @@ class MoveTool {
             this._snapGuidePoint.remove();
             this._snapGuidePoint = null;
         }
+        if (this._pathTextGuide) {
+            this._pathTextGuide.remove();
+            this._pathTextGuide = null;
+        }
+        if (this._pathTextGuidePoint) {
+            this._pathTextGuidePoint.remove();
+            this._pathTextGuidePoint = null;
+        }
+    }
+    _showPathTextGuide (path, point) {
+        const guideLayer = getGuideLayer();
+        if (!guideLayer) return;
+        const guidePath = path.clone(false);
+        if (!guidePath) return;
+        guidePath.guide = true;
+        guidePath.data = {isHelperItem: true};
+        guidePath.fillColor = null;
+        guidePath.strokeColor = new paper.Color(SNAP_GUIDE_COLOR);
+        guidePath.strokeWidth = 1 / paper.view.zoom;
+        guidePath.dashArray = [4 / paper.view.zoom, 3 / paper.view.zoom];
+        guideLayer.addChild(guidePath);
+        const guidePoint = new paper.Path.Circle({
+            center: point,
+            radius: 4 / paper.view.zoom,
+            fillColor: new paper.Color(SNAP_GUIDE_COLOR),
+            guide: true,
+            data: {isHelperItem: true}
+        });
+        guideLayer.addChild(guidePoint);
+        this._pathTextGuide = guidePath;
+        this._pathTextGuidePoint = guidePoint;
     }
     _showSnapGuides (best, actionBounds) {
         this._removeSnapGuides();
@@ -424,6 +609,10 @@ class MoveTool {
         this._removeSnapGuides();
         this._selectionBounds = null;
         this.firstDrag = false;
+        const pathTextChanged = Boolean(this._pathText);
+        this._pathText = null;
+        this._pathTextArmed = true;
+        this._pathTextDetachedPath = null;
         let moved = false;
         // resetting the items origin point for the next usage
         for (const item of this.selectedItems) {
@@ -435,7 +624,7 @@ class MoveTool {
         this.selectedItems = null;
         this.selectionCenter = null;
 
-        if (moved) {
+        if (moved || pathTextChanged) {
             this.onUpdateImage();
         }
 

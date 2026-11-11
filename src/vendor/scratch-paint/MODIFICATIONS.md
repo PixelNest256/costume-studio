@@ -11,7 +11,7 @@ AGPLv3, subject to the applicable source and notice requirements. The full
 GPL-3.0 text is included as `LICENSE-GPL-3.0` in this directory and at the
 repository root. The upstream AGPL text is included as `LICENSE`.
 
-Modification date: 2026-11-09.
+Modification date: 2026-11-11.
 
 ## Adapted or added areas
 
@@ -29,8 +29,10 @@ Modification date: 2026-11-09.
 - SVG/raster import normalization inspired by Scratch Addons
   `better-img-uploads` and `fix-uploaded-svgs` (see `src/lib/files.js`).
 - Additional local changes for Costume Studio: text-to-path handling,
-  editor range/stage options, stroke toggling, keyboard shortcuts, custom
-  fonts, color history, and the color palette panel.
+  text-on-path snapping and detachment (`helper/path-text.js` and the
+  move-tool integration), editor range/stage options, stroke toggling,
+  keyboard shortcuts, custom fonts, color history, and the color palette
+  panel.
 
 This is a provenance summary, not a verified line-by-line inventory. Review
 the linked upstream projects and the repository history before redistributing

@@ -19,6 +19,7 @@ export const DEFAULT_FEATURES = {
     snapBoxCorners: false,
     snapBoxEdgeMids: false,
     snapCtrlDisable: true,
+    snapTextToPath: false,
     pasteNoOffset: true,
     autoBackup: true,
     // Nudge: when fixed is on, the numeric values are in project units
@@ -40,7 +41,8 @@ export const FEATURE_GROUPS = [
         key: 'features.groupSnap',
         items: [
             ['snap', 'features.snap', 'features.snapHint'],
-            ['snapCtrlDisable', 'features.snapCtrlDisable', 'features.snapCtrlDisableHint']
+            ['snapCtrlDisable', 'features.snapCtrlDisable', 'features.snapCtrlDisableHint'],
+            ['snapTextToPath', 'features.snapTextToPath', 'features.snapTextToPathHint']
         ]
     },
     {

@@ -160,6 +160,14 @@ const FeaturesMenu = ({features, onChangeValue, onToggle}) => {
                                             labelKey="features.snapCtrlDisable"
                                             hintKey="features.snapCtrlDisableHint"
                                         />
+                                        <SettingRow
+                                            features={features}
+                                            onToggle={onToggle}
+                                            t={t}
+                                            id="snapTextToPath"
+                                            labelKey="features.snapTextToPath"
+                                            hintKey="features.snapTextToPathHint"
+                                        />
                                         <h3 className="feature-subsection-title">{t('features.groupSnapTo', 'Snap targets')}</h3>
                                         <div className="feature-setting-grid">
                                             {snapTo.map(([id, labelKey]) => (
