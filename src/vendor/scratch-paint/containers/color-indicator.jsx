@@ -11,6 +11,7 @@ import Formats, {isBitmap} from '../lib/format';
 import GradientTypes from '../lib/gradient-types';
 
 import ColorIndicatorComponent from '../components/color-indicator.jsx';
+import AdvancedGradientEditor from '../components/gradient-editor/gradient-editor.jsx';
 import {applyColorToSelection,
     applyGradientTypeToSelection,
     applyStrokeWidthToSelection,
@@ -26,11 +27,14 @@ const makeColorIndicator = (label, isStroke) => {
                 'handleChangeColor',
                 'handleChangeGradientType',
                 'handleCloseColor',
+                'handleCloseAdvancedGradient',
+                'handleOpenAdvancedGradient',
                 'handleSwap'
             ]);
 
             // Flag to track whether an svg-update-worthy change has been made
             this._hasChanged = false;
+            this.state = {advancedGradientOpen: false};
         }
         componentWillReceiveProps (newProps) {
             const {colorModalVisible, onUpdateImage} = this.props;
@@ -115,6 +119,15 @@ const makeColorIndicator = (label, isStroke) => {
             const color = props.colorIndex === 0 ? props.color : props.color2;
             if (color) addColorHistory(color);
         }
+        handleOpenAdvancedGradient () {
+            // Close the two-color picker before the advanced editor opens so its
+            // stale two-stop swatch is not left visible behind the dialog.
+            this.handleCloseColor();
+            this.setState({advancedGradientOpen: true});
+        }
+        handleCloseAdvancedGradient () {
+            this.setState({advancedGradientOpen: false});
+        }
         handleCloseColor () {
             // If the eyedropper is currently being used, don't
             // close the color menu.
@@ -145,16 +158,29 @@ const makeColorIndicator = (label, isStroke) => {
             }
         }
         render () {
-            return (
-                <ColorIndicatorComponent
-                    {...this.props}
-                    label={this.props.intl.formatMessage(label)}
-                    outline={isStroke}
-                    onChangeColor={this.handleChangeColor}
-                    onChangeGradientType={this.handleChangeGradientType}
-                    onCloseColor={this.handleCloseColor}
-                    onSwap={this.handleSwap}
+            const advancedGradient = this.state.advancedGradientOpen ? (
+                <AdvancedGradientEditor
+                    isStroke={isStroke}
+                    onClose={this.handleCloseAdvancedGradient}
+                    onUpdateImage={this.props.onUpdateImage}
                 />
+            ) : null;
+            return (
+                <>
+                    <ColorIndicatorComponent
+                        {...this.props}
+                        advancedGradientOpen={this.state.advancedGradientOpen}
+                        label={this.props.intl.formatMessage(label)}
+                        outline={isStroke}
+                        onChangeColor={this.handleChangeColor}
+                        onChangeGradientType={this.handleChangeGradientType}
+                        onCloseColor={this.handleCloseColor}
+                        onOpenAdvancedGradient={!isBitmap(this.props.format) ?
+                            this.handleOpenAdvancedGradient : undefined}
+                        onSwap={this.handleSwap}
+                    />
+                    {advancedGradient}
+                </>
             );
         }
     }

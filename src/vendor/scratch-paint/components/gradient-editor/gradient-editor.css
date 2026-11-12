@@ -1,0 +1,231 @@
+.backdrop {
+    align-items: center;
+    background: rgba(0, 0, 0, 0.35);
+    display: flex;
+    inset: 0;
+    justify-content: center;
+    position: fixed;
+    z-index: 3000;
+}
+
+.dialog {
+    background: var(--paint-popover-background, #ffffff);
+    border: 1px solid var(--paint-ui-pane-border, #d9d9d9);
+    border-radius: 10px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22);
+    color: var(--paint-text-primary, #575e75);
+    max-height: calc(100vh - 48px);
+    overflow: auto;
+    padding: 16px;
+    width: min(460px, calc(100vw - 32px));
+}
+
+.header {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.header h2 {
+    font-size: 16px;
+    margin: 0;
+}
+
+.close {
+    background: none;
+    border: 0;
+    color: inherit;
+    cursor: pointer;
+    font-size: 22px;
+    line-height: 1;
+}
+
+.typeRow {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.type,
+.typeSelected {
+    background: var(--paint-input-background, #fff);
+    border: 1px solid var(--paint-ui-pane-border, #d9d9d9);
+    border-radius: 6px;
+    color: inherit;
+    cursor: pointer;
+    padding: 6px 12px;
+}
+
+.typeSelected {
+    background: var(--paint-looks-secondary, #855cd6);
+    border-color: var(--paint-looks-secondary, #855cd6);
+    color: #fff;
+}
+
+.track {
+    border: 1px solid var(--paint-ui-pane-border, #d9d9d9);
+    border-radius: 6px;
+    cursor: crosshair;
+    height: 34px;
+    margin: 8px 0 4px;
+    position: relative;
+}
+
+.stopHandle {
+    background: #fff;
+    border: 2px solid #6b6b6b;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+    cursor: ew-resize;
+    height: 18px;
+    margin-left: -9px;
+    padding: 0;
+    position: absolute;
+    top: 28px;
+    width: 18px;
+    z-index: 1;
+}
+
+.stopHandle span {
+    border-radius: 50%;
+    display: block;
+    height: 10px;
+    margin: auto;
+    width: 10px;
+}
+
+.stopActions {
+    align-items: center;
+    display: flex;
+    font-size: 12px;
+    justify-content: space-between;
+    margin: 20px 0 8px;
+}
+
+.stopActions button,
+.stopRow button,
+.footer button {
+    background: var(--paint-input-background, #fff);
+    border: 1px solid var(--paint-ui-pane-border, #d9d9d9);
+    border-radius: 5px;
+    color: inherit;
+    cursor: pointer;
+    padding: 4px 8px;
+}
+
+.stopList {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: 190px;
+    overflow: auto;
+}
+
+.stopRow,
+.stopRowSelected {
+    align-items: center;
+    border: 1px solid transparent;
+    border-radius: 5px;
+    display: grid;
+    gap: 8px;
+    grid-template-columns: 52px minmax(100px, 1fr) minmax(95px, 1fr) 24px;
+    padding: 4px 8px;
+}
+
+.stopRowSelected {
+    background: var(--paint-looks-transparent, rgba(133, 92, 214, 0.15));
+    border-color: var(--paint-looks-secondary, #855cd6);
+}
+
+.stopRow input[type="color"] {
+    background: none;
+    border: 1px solid var(--paint-ui-pane-border, #d9d9d9);
+    border-radius: 4px;
+    height: 26px;
+    min-width: 0;
+    padding: 0;
+    width: 34px;
+}
+
+.stopRow label {
+    align-items: center;
+    display: flex;
+    font-size: 11px;
+    gap: 4px;
+    min-width: 0;
+    white-space: nowrap;
+}
+
+.stopRow label input {
+    background: var(--paint-input-background, #fff);
+    border: 1px solid var(--paint-ui-pane-border, #d9d9d9);
+    border-radius: 4px;
+    color: inherit;
+    height: 24px;
+    padding: 0 4px;
+    width: 46px;
+}
+
+.stopRow button {
+    padding: 2px 5px;
+}
+
+.stopRow button:disabled,
+.footer button:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+}
+
+.control {
+    align-items: center;
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.control input[type="range"] {
+    flex: 1;
+}
+
+.control input[type="number"],
+.radialControls input {
+    background: var(--paint-input-background, #fff);
+    border: 1px solid var(--paint-ui-pane-border, #d9d9d9);
+    border-radius: 4px;
+    color: inherit;
+    height: 26px;
+    padding: 0 5px;
+    width: 64px;
+}
+
+.radialControls {
+    display: flex;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.radialControls label {
+    align-items: center;
+    display: flex;
+    font-size: 11px;
+    gap: 4px;
+}
+
+.footer {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-top: 18px;
+}
+
+.footer .apply {
+    background: var(--paint-looks-secondary, #855cd6);
+    border-color: var(--paint-looks-secondary, #855cd6);
+    color: #fff;
+}
+
+.empty {
+    margin: 20px 0;
+    text-align: center;
+}

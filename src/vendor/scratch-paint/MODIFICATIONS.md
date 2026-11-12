@@ -34,8 +34,9 @@ Modification date: 2026-11-11.
   (`helper/selection-tools/scale-snap.js`), corner rounding handles in
   Reshape mode (`helper/selection-tools/round-corners.js`), object effects
   (blur/shadow/glow via canvas and SVG filters, using the standard Scratch
-  color picker), a combined polygon/rectangle drawing tool with side count,
-  star ratio, rounded corners, and Shift-regular polygons, editor
+  color picker), a multi-stop advanced gradient editor available from the
+  fill/stroke color pickers, a combined polygon/rectangle drawing tool with
+  side count, star ratio, rounded corners, and Shift-regular polygons, editor
   range/stage options, stroke toggling,
   keyboard shortcuts, custom fonts, color history, and the color palette
   panel.

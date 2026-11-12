@@ -218,3 +218,16 @@
 .history-swatch:hover {
     transform: scale(1.12);
 }
+
+.advanced-gradient-button {
+    background: none;
+    border: 1px solid $looks-secondary;
+    border-radius: 1rem;
+    color: $looks-secondary;
+    cursor: pointer;
+    font-size: .75rem;
+    font-weight: bold;
+    margin-top: .5rem;
+    padding: .25rem .75rem;
+    width: 100%;
+}

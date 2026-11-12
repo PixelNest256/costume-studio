@@ -23,12 +23,13 @@ const ColorIndicatorComponent = props => (
                     shouldShowGradientTools={props.shouldShowGradientTools}
                     onChangeColor={props.onChangeColor}
                     onChangeGradientType={props.onChangeGradientType}
+                    onOpenAdvancedGradient={props.onOpenAdvancedGradient}
                     onSwap={props.onSwap}
                 />
             }
             isOpen={props.colorModalVisible}
             preferPlace="below"
-            onOuterAction={props.onCloseColor}
+            onOuterAction={props.advancedGradientOpen ? () => {} : props.onCloseColor}
         >
             <Label text={props.label}>
                 <ColorButton
@@ -52,10 +53,12 @@ ColorIndicatorComponent.propTypes = {
     color2: PropTypes.string,
     colorModalVisible: PropTypes.bool.isRequired,
     gradientType: PropTypes.oneOf(Object.keys(GradientTypes)).isRequired,
+    advancedGradientOpen: PropTypes.bool,
     label: PropTypes.string.isRequired,
     onChangeColor: PropTypes.func.isRequired,
     onChangeGradientType: PropTypes.func.isRequired,
     onCloseColor: PropTypes.func.isRequired,
+    onOpenAdvancedGradient: PropTypes.func,
     onOpenColor: PropTypes.func.isRequired,
     onSwap: PropTypes.func.isRequired,
     outline: PropTypes.bool.isRequired,

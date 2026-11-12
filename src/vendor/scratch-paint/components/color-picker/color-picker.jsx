@@ -39,6 +39,11 @@ const messages = defineMessages({
         defaultMessage: 'Swap',
         description: 'Label for button that swaps the two colors in a gradient',
         id: 'paint.colorPicker.swap'
+    },
+    advancedGradient: {
+        defaultMessage: 'Advanced gradient',
+        description: 'Button that opens the multi-stop gradient editor',
+        id: 'paint.colorPicker.advancedGradient'
     }
 });
 class ColorPickerComponent extends React.Component {
@@ -416,6 +421,15 @@ class ColorPickerComponent extends React.Component {
                         </div>
                     </div>
                 </div>
+                {this.props.onOpenAdvancedGradient ? (
+                    <button
+                        className={styles.advancedGradientButton}
+                        onClick={this.props.onOpenAdvancedGradient}
+                        type="button"
+                    >
+                        {this.props.intl.formatMessage(messages.advancedGradient)}
+                    </button>
+                ) : null}
                 <div className={styles.historyRow}>
                     <span className={styles.historyLabel}>
                         {this.props.intl.formatMessage({
@@ -467,6 +481,7 @@ ColorPickerComponent.propTypes = {
     onSaturationBrightnessChange: PropTypes.func.isRequired,
     history: PropTypes.array.isRequired,
     onHistorySelect: PropTypes.func.isRequired,
+    onOpenAdvancedGradient: PropTypes.func,
     onSelectColor: PropTypes.func.isRequired,
     onSelectColor2: PropTypes.func.isRequired,
     onSwap: PropTypes.func,

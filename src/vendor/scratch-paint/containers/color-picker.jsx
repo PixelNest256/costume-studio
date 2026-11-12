@@ -221,6 +221,7 @@ class ColorPicker extends React.Component {
                 onSaturationBrightnessChange={this.handleSaturationBrightnessChange}
                 history={this.state.history}
                 onHistorySelect={this.handleHistorySelect}
+                onOpenAdvancedGradient={this.props.onOpenAdvancedGradient}
                 onSelectColor={this.props.onSelectColor}
                 onSelectColor2={this.props.onSelectColor2}
                 onSwap={this.props.onSwap}
@@ -240,6 +241,7 @@ ColorPicker.propTypes = {
     onActivateEyeDropper: PropTypes.func.isRequired,
     onChangeColor: PropTypes.func.isRequired,
     onChangeGradientType: PropTypes.func,
+    onOpenAdvancedGradient: PropTypes.func,
     onSelectColor: PropTypes.func.isRequired,
     onSelectColor2: PropTypes.func.isRequired,
     onSwap: PropTypes.func,
