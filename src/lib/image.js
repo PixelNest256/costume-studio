@@ -51,6 +51,90 @@ export const getSvgInfo = svg => {
     }
 };
 
+const parseSvgNumber = (value, fallback = 0) => {
+    const number = parseFloat(value);
+    return Number.isFinite(number) ? number : fallback;
+};
+
+const parseSvgNumbers = value => String(value || '')
+    .trim()
+    .split(/[\s,]+/)
+    .map(parseFloat)
+    .filter(Number.isFinite);
+
+/**
+ * Find how far a filter can draw outside its source object. Scratch does not
+ * render SVG filters, but the PNG exporter should still keep their visible
+ * bleed instead of clipping it to the costume bounds.
+ */
+export const getSvgEffectPadding = svg => {
+    try {
+        const document = new DOMParser().parseFromString(svg, 'image/svg+xml');
+        if (!document.documentElement || document.querySelector('parsererror')) return 0;
+        let extent = 0;
+        for (const filter of Array.from(document.querySelectorAll('filter'))) {
+            for (const primitive of Array.from(filter.children)) {
+                const tag = primitive.nodeName.toLowerCase();
+                const deviations = parseSvgNumbers(primitive.getAttribute('stdDeviation'));
+                const stdDeviation = deviations.length ? Math.max(...deviations) : 0;
+                const dx = parseSvgNumber(primitive.getAttribute('dx'));
+                const dy = parseSvgNumber(primitive.getAttribute('dy'));
+                if (tag === 'fegaussianblur') {
+                    extent = Math.max(extent, stdDeviation * 4);
+                } else if (tag === 'fedropshadow') {
+                    extent = Math.max(
+                        extent,
+                        Math.abs(dx) + (stdDeviation * 4),
+                        Math.abs(dy) + (stdDeviation * 4)
+                    );
+                } else if (tag === 'feoffset') {
+                    extent = Math.max(extent, Math.abs(dx), Math.abs(dy));
+                }
+            }
+        }
+        return extent > 0 ? Math.ceil(extent) + 2 : 0;
+    } catch (error) {
+        return 0;
+    }
+};
+
+const expandSvgViewport = (svg, padding) => {
+    try {
+        const document = new DOMParser().parseFromString(svg, 'image/svg+xml');
+        const root = document.documentElement;
+        if (!root || document.querySelector('parsererror')) return svg;
+        const info = getSvgInfo(svg);
+        const viewBox = root.getAttribute('viewBox');
+        const parts = viewBox ? viewBox.trim().split(/[\s,]+/).map(Number) : [];
+        const hasViewBox = parts.length === 4 && parts.every(Number.isFinite) && parts[2] > 0 && parts[3] > 0;
+        const x = hasViewBox ? parts[0] : 0;
+        const y = hasViewBox ? parts[1] : 0;
+        const width = hasViewBox ? parts[2] : (info.width || 480);
+        const height = hasViewBox ? parts[3] : (info.height || 360);
+        root.setAttribute(
+            'viewBox',
+            `${x - padding} ${y - padding} ${width + (padding * 2)} ${height + (padding * 2)}`
+        );
+        root.setAttribute('width', String(width + (padding * 2)));
+        root.setAttribute('height', String(height + (padding * 2)));
+        return new XMLSerializer().serializeToString(root);
+    } catch (error) {
+        return svg;
+    }
+};
+
+export const hasUnsupportedSvgEffects = svg => {
+    try {
+        const document = new DOMParser().parseFromString(svg, 'image/svg+xml');
+        if (!document.documentElement || document.querySelector('parsererror')) return false;
+        return Boolean(document.querySelector(
+            'filter, [filter], feGaussianBlur, feDropShadow, feOffset, feBlend'
+        ));
+    } catch (error) {
+        return false;
+    }
+};
+
 export const imageDataToDataUrl = imageData => {
     const canvas = document.createElement('canvas');
     canvas.width = imageData.width;
@@ -69,7 +153,12 @@ export const bitmapToSvg = (dataUrl, width, height) => {
 };
 
 export const svgToPngBlob = async (svg, inlineSvgFonts, scale = 1) => {
-    const info = getSvgInfo(svg);
+    let portableSvg = inlineSvgFonts ? inlineSvgFonts(svg) : svg;
+    const effectPadding = getSvgEffectPadding(portableSvg);
+    if (effectPadding > 0) {
+        portableSvg = expandSvgViewport(portableSvg, effectPadding);
+    }
+    const info = getSvgInfo(portableSvg);
     const width = info.width || 480;
     const height = info.height || 360;
 
@@ -84,7 +173,6 @@ export const svgToPngBlob = async (svg, inlineSvgFonts, scale = 1) => {
         renderHeight = Math.max(1, Math.floor(renderHeight * ratio));
     }
 
-    const portableSvg = inlineSvgFonts ? inlineSvgFonts(svg) : svg;
     const url = URL.createObjectURL(new Blob([portableSvg], {type: 'image/svg+xml;charset=utf-8'}));
 
     try {

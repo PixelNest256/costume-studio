@@ -25,7 +25,7 @@ import {
     VectorIcon
 } from './components/Icons.jsx';
 import {getMessages, rememberLocale, SUPPORTED_LOCALES} from './i18n.js';
-import {addXmlDeclaration, bitmapToSvg, blobToDataUrl, getSvgInfo, imageDataToDataUrl, mergeBitmapImages, mergeSvgImages, pngToPngBlob, svgToPngBlob} from './lib/image.js';
+import {addXmlDeclaration, bitmapToSvg, blobToDataUrl, getSvgInfo, hasUnsupportedSvgEffects, imageDataToDataUrl, mergeBitmapImages, mergeSvgImages, pngToPngBlob, svgToPngBlob} from './lib/image.js';
 import {FileReadError, readCostumeFile} from './lib/files.js';
 import {downloadBlob, sanitizeFilename} from './lib/download.js';
 import {clearAutosave, hasBackup, loadBackups, saveBackup} from './lib/storage.js';
@@ -109,6 +109,7 @@ const App = () => {
     const nextNameRef = useRef(initial.nextName);
     const dragDepthRef = useRef(0);
     const toastKeyRef = useRef(0);
+    const handleSaveRef = useRef(null);
 
     const nextImageId = useCallback(prefix => {
         imageIdRef.current += 1;
@@ -530,12 +531,27 @@ const App = () => {
         );
     }, [showToast]);
 
-    const handleSave = useCallback(async kind => {
+    const handleSave = useCallback(async (kind, {skipEffectsWarning = false} = {}) => {
         if (!doc.image) {
             showToast('toast.empty');
             return;
         }
         if (busy) return;
+
+        if (!skipEffectsWarning && (kind === 'svg' || kind === 'paths') &&
+                doc.format === 'vector' && hasUnsupportedSvgEffects(doc.image)) {
+            setConfirm({
+                titleId: 'save.svgEffectsTitle',
+                messageId: 'save.svgEffectsMessage',
+                confirmId: 'save.svgEffectsContinue',
+                action: () => {
+                    if (handleSaveRef.current) {
+                        handleSaveRef.current(kind, {skipEffectsWarning: true});
+                    }
+                }
+            });
+            return;
+        }
 
         setBusy('save');
         try {
@@ -597,6 +613,8 @@ const App = () => {
             setBusy(null);
         }
     }, [busy, doc, showToast]);
+
+    handleSaveRef.current = handleSave;
 
     useEffect(() => {
         const isEditable = target => (
