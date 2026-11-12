@@ -31,9 +31,12 @@ Modification date: 2026-11-11.
 - Additional local changes for Costume Studio: text-to-path handling,
   text-on-path snapping and detachment (`helper/path-text.js` and the
   move-tool integration), size snapping while scaling
-  (`helper/selection-tools/scale-snap.js`), object effects (blur/shadow/glow
-  via canvas and SVG filters, using the standard Scratch color picker),
-  editor range/stage options, stroke toggling,
+  (`helper/selection-tools/scale-snap.js`), corner rounding handles in
+  Reshape mode (`helper/selection-tools/round-corners.js`), object effects
+  (blur/shadow/glow via canvas and SVG filters, using the standard Scratch
+  color picker), a combined polygon/rectangle drawing tool with side count,
+  star ratio, rounded corners, and Shift-regular polygons, editor
+  range/stage options, stroke toggling,
   keyboard shortcuts, custom fonts, color history, and the color palette
   panel.
 

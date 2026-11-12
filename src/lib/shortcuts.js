@@ -38,9 +38,8 @@ export const TOOL_SHORTCUTS = {
     'paint.textMode.text': 'T',
     'paint.lineMode.line': 'L',
     'paint.ovalMode.oval': 'C',
-    'paint.rectMode.rect': 'R',
     'paint.penMode.pen': 'P',
-    'paint.triangleMode.triangle': 'Y',
+    'paint.polygonMode.polygon': 'Y',
     'paint.arrowMode.arrow': 'V',
     'paint.shapeMode.shape': 'M'
 };

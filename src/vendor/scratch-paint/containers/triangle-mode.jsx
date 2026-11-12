@@ -14,7 +14,7 @@ import { changeStrokeColor, clearStrokeGradient } from '../reducers/stroke-style
 import { changeMode } from '../reducers/modes';
 import { clearSelectedItems, setSelectedItems } from '../reducers/selected-items';
 import { setCursor } from '../reducers/cursor';
-import { changeTrianglePolyCount, changeTrianglePointCount } from '../reducers/triangle-mode';
+import { changeTriangleCornerSize, changeTrianglePolyCount, changeTrianglePointCount } from '../reducers/triangle-mode';
 
 import { clearSelection, getSelectedLeafItems } from '../helper/selection';
 import TriangleTool from '../helper/tools/triangle-tool';
@@ -47,6 +47,9 @@ class TriangleMode extends React.Component {
         if (this.tool && nextProps.pointCount !== this.props.pointCount) {
             this.tool.setPointCount(nextProps.pointCount);
         }
+        if (this.tool && nextProps.roundedCornerSize !== this.props.roundedCornerSize) {
+            this.tool.setRoundedCornerSize(nextProps.roundedCornerSize);
+        }
 
         if (nextProps.isTriangleModeActive && !this.props.isTriangleModeActive) {
             this.activateTool();
@@ -72,6 +75,9 @@ class TriangleMode extends React.Component {
         if (typeof this.props.pointCount !== "number") {
             this.props.onSetPointCount(1);
         }
+        if (typeof this.props.roundedCornerSize !== "number") {
+            this.props.onSetRoundedCornerSize(0);
+        }
 
         this.tool = new TriangleTool(
             this.props.setSelectedItems,
@@ -81,6 +87,7 @@ class TriangleMode extends React.Component {
         );
         this.tool.setSideCount(this.props.sideCount);
         this.tool.setPointCount(this.props.pointCount);
+        this.tool.setRoundedCornerSize(this.props.roundedCornerSize);
         this.tool.setColorState(this.props.colorState);
         this.tool.activate();
     }
@@ -163,8 +170,10 @@ TriangleMode.propTypes = {
     setSelectedItems: PropTypes.func.isRequired,
     sideCount: PropTypes.number.isRequired,
     pointCount: PropTypes.number.isRequired,
+    roundedCornerSize: PropTypes.number.isRequired,
     onSetSideCount: PropTypes.func.isRequired,
     onSetPointCount: PropTypes.func.isRequired,
+    onSetRoundedCornerSize: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = state => ({
@@ -173,6 +182,7 @@ const mapStateToProps = state => ({
     selectedItems: state.scratchPaint.selectedItems,
     sideCount: state.scratchPaint.triangleMode.trianglePolyCount,
     pointCount: state.scratchPaint.triangleMode.trianglePointCount,
+    roundedCornerSize: state.scratchPaint.triangleMode.triangleCornerSize,
 });
 const mapDispatchToProps = dispatch => ({
     clearSelectedItems: () => {
@@ -204,6 +214,9 @@ const mapDispatchToProps = dispatch => ({
     },
     onSetPointCount: pointCount => {
         dispatch(changeTrianglePointCount(pointCount));
+    },
+    onSetRoundedCornerSize: roundedCornerSize => {
+        dispatch(changeTriangleCornerSize(roundedCornerSize));
     }
 });
 

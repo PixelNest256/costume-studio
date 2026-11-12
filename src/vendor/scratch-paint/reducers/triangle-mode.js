@@ -2,7 +2,8 @@ import log from '../log/log';
 
 const CHANGE_TRIANGLE_SIDE_COUNT = 'scratch-paint/triangle-mode/CHANGE_TRIANGLE_SIDE_COUNT';
 const CHANGE_TRIANGLE_POINT_COUNT = 'scratch-paint/triangle-mode/CHANGE_TRIANGLE_POINT_COUNT';
-const initialState = { trianglePolyCount: 3, trianglePointCount: 1 };
+const CHANGE_TRIANGLE_CORNER_SIZE = 'scratch-paint/triangle-mode/CHANGE_TRIANGLE_CORNER_SIZE';
+const initialState = { trianglePolyCount: 3, trianglePointCount: 1, triangleCornerSize: 0 };
 
 const reducer = function (state, action) {
     if (typeof state === 'undefined') state = initialState;
@@ -12,14 +13,33 @@ const reducer = function (state, action) {
                 log.warn(`Invalid side count: ${action.trianglePolyCount}`);
                 return state;
             }
-            return { trianglePolyCount: Math.floor(Math.max(3, action.trianglePolyCount)), trianglePointCount: state.trianglePointCount };
+            return {
+                trianglePolyCount: Math.floor(Math.max(3, action.trianglePolyCount)),
+                trianglePointCount: state.trianglePointCount,
+                triangleCornerSize: state.triangleCornerSize
+            };
 
         case CHANGE_TRIANGLE_POINT_COUNT:
             if (isNaN(action.trianglePointCount)) {
                 log.warn(`Invalid spike ratio: ${action.trianglePointCount}`);
                 return state;
             }
-            return { trianglePointCount: Math.max(0.01, action.trianglePointCount), trianglePolyCount: state.trianglePolyCount };
+            return {
+                trianglePointCount: Math.max(0.01, action.trianglePointCount),
+                trianglePolyCount: state.trianglePolyCount,
+                triangleCornerSize: state.triangleCornerSize
+            };
+
+        case CHANGE_TRIANGLE_CORNER_SIZE:
+            if (isNaN(action.triangleCornerSize)) {
+                log.warn(`Invalid corner size: ${action.triangleCornerSize}`);
+                return state;
+            }
+            return {
+                trianglePolyCount: state.trianglePolyCount,
+                trianglePointCount: state.trianglePointCount,
+                triangleCornerSize: Math.max(0, action.triangleCornerSize)
+            };
         default:
             return state;
     }
@@ -40,8 +60,16 @@ const changeTrianglePointCount = function (trianglePointCount) {
     };
 };
 
+const changeTriangleCornerSize = function (triangleCornerSize) {
+    return {
+        type: CHANGE_TRIANGLE_CORNER_SIZE,
+        triangleCornerSize: triangleCornerSize
+    };
+};
+
 export {
     reducer as default,
     changeTrianglePolyCount,
-    changeTrianglePointCount
+    changeTrianglePointCount,
+    changeTriangleCornerSize
 };

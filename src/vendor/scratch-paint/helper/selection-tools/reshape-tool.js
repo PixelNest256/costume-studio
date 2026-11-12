@@ -11,6 +11,7 @@ import MoveTool from './move-tool';
 import PointTool from './point-tool';
 import HandleTool from './handle-tool';
 import SelectionBoxTool from './selection-box-tool';
+import RoundCornersOverlay from './round-corners';
 import {getNudgeSettings} from '../../../../lib/features.js';
 
 /** Modes of the reshape tool, which can do many things depending on how it's used. */
@@ -70,6 +71,8 @@ class ReshapeTool extends paper.Tool {
         this.lastEvent = null;
         this.active = false;
         this.mode = ReshapeModes.SELECTION_BOX;
+        this._roundDrag = false;
+        this._roundCorners = new RoundCornersOverlay(onUpdateImage);
         this._modeMap = {};
         this._modeMap[ReshapeModes.FILL] =
             new MoveTool(Modes.RESHAPE, setSelectedItems, clearSelectedItems, onUpdateImage, switchToTextTool);
@@ -221,6 +224,19 @@ class ReshapeTool extends paper.Tool {
         this.active = true;
         this.clearHoveredItem();
 
+        this._roundCorners.refresh();
+        const nativeEvent = event.event || {};
+        const ctrl = (event.modifiers && (event.modifiers.control || event.modifiers.meta)) ||
+            nativeEvent.ctrlKey || nativeEvent.metaKey;
+        // With Ctrl held, make the corner easier to pick by allowing a click
+        // on the corner tip in addition to the offset rounding handle.
+        const roundHandle = this._roundCorners.hitTest(event.point, ctrl ? 12 : 0);
+        if (roundHandle) {
+            this._roundDrag = true;
+            this._roundCorners.startDrag(roundHandle, event, ctrl);
+            return;
+        }
+
         // Check if double clicked
         let doubleClicked = false;
         if (this.lastEvent) {
@@ -275,6 +291,9 @@ class ReshapeTool extends paper.Tool {
         }
     }
     handleMouseMove (event) {
+        if (!this._roundDrag) {
+            this._roundCorners.refresh();
+        }
         const hitResult = this.getHitResult(event.point);
         let hoveredItem;
 
@@ -298,10 +317,21 @@ class ReshapeTool extends paper.Tool {
     }
     handleMouseDrag (event) {
         if (event.event.button > 0 || !this.active) return; // only first mouse button
+        if (this._roundDrag) {
+            this._roundCorners.dragTo(event.point);
+            return;
+        }
         this._modeMap[this.mode].onMouseDrag(event);
     }
     handleMouseUp (event) {
         if (event.event.button > 0 || !this.active) return; // only first mouse button
+        if (this._roundDrag) {
+            this._roundCorners.endDrag();
+            this._roundDrag = false;
+            this.mode = ReshapeModes.SELECTION_BOX;
+            this.active = false;
+            return;
+        }
         if (this.mode === ReshapeModes.SELECTION_BOX) {
             this._modeMap[this.mode].onMouseUpVector(event);
         } else {
@@ -366,6 +396,8 @@ class ReshapeTool extends paper.Tool {
     }
     deactivateTool () {
         paper.settings.handleSize = 0;
+        this._roundCorners.clear();
+        this._roundDrag = false;
         this.clearHoveredItem();
         this.setHoveredItem = null;
         this.clearHoveredItem = null;

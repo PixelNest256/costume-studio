@@ -76,6 +76,11 @@ const messages = defineMessages({
         description: 'Label for the triangle tool',
         id: 'paint.triangleMode.triangle'
     },
+    polygon: {
+        defaultMessage: 'Polygon',
+        description: 'Label for the polygon tool',
+        id: 'paint.polygonMode.polygon'
+    },
     arrow: {
         defaultMessage: 'Arrow',
         description: 'Label for the arrow tool',

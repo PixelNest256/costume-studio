@@ -13,7 +13,7 @@ import { changeBrushSize as changeEraserSize, changeSimplifySize as changeEraser
 import {changeSimplifySize as changePenSimplifySize} from '../../reducers/pen-mode';
 import { changeRoundedRectCornerSize } from '../../reducers/rounded-rect-mode';
 import { changeRoundedCornerSize } from '../../reducers/rect-mode';
-import { changeTrianglePolyCount, changeTrianglePointCount } from '../../reducers/triangle-mode';
+import { changeTriangleCornerSize, changeTrianglePolyCount, changeTrianglePointCount } from '../../reducers/triangle-mode';
 import { changeCurrentlySelectedShape } from '../../reducers/sussy-mode';
 import { changeBitBrushSize } from '../../reducers/bit-brush-size';
 import { changeBitEraserSize } from '../../reducers/bit-eraser-size';
@@ -68,7 +68,7 @@ import brushIcon from '../brush-mode/brush.svg';
 import curvedPointIcon from './icons/curved-point.svg';
 import eraserIcon from '../eraser-mode/eraser.svg';
 import roundedRectIcon from '../rounded-rect-mode/rounded-rectangle.svg';
-import triangleIcon from '../triangle-mode/triangle.svg';
+import polygonIcon from '../triangle-mode/polygon.svg';
 import triangleSpikeRatioIcon from './icons/triangle-spike-ratio.svg';
 import flipHorizontalIcon from './icons/flip-horizontal.svg';
 import flipVerticalIcon from './icons/flip-vertical.svg';
@@ -510,7 +510,7 @@ const ModeToolsComponent = props => {
                                 title={props.intl.formatMessage(messages.currentSideCount)}
                                 className={styles.modeToolsIcon}
                                 draggable={false}
-                                src={triangleIcon}
+                                src={polygonIcon}
                             />
                         </div>
                         <LiveInput
@@ -540,6 +540,24 @@ const ModeToolsComponent = props => {
                             type="number"
                             value={currentPointValue}
                             onSubmit={changeFunctionPoint}
+                        />
+                        <div>
+                            <img
+                                alt={props.intl.formatMessage(messages.roundedCornerSize)}
+                                title={props.intl.formatMessage(messages.roundedCornerSize)}
+                                className={styles.modeToolsIcon}
+                                draggable={false}
+                                src={roundedRectIcon}
+                            />
+                        </div>
+                        <LiveInput
+                            max={1000}
+                            min={0}
+                            onSubmit={props.onTriangleCornerSliderChange}
+                            range
+                            small
+                            type="number"
+                            value={props.triangleCornerValue}
                         />
                     </div>
                 );
@@ -988,6 +1006,7 @@ ModeToolsComponent.propTypes = {
     roundedRectCornerValue: PropTypes.number,
     trianglePolyValue: PropTypes.number,
     trianglePointValue: PropTypes.number,
+    triangleCornerValue: PropTypes.number,
     currentlySelectedShape: PropTypes.string,
     fillBitmapShapes: PropTypes.bool,
     format: PropTypes.oneOf(Object.keys(Formats)),
@@ -1042,6 +1061,7 @@ const mapStateToProps = state => ({
     roundedCornerValue: state.scratchPaint.rectMode.roundedCornerSize,
     trianglePolyValue: state.scratchPaint.triangleMode.trianglePolyCount,
     trianglePointValue: state.scratchPaint.triangleMode.trianglePointCount,
+    triangleCornerValue: state.scratchPaint.triangleMode.triangleCornerSize,
     currentlySelectedShape: state.scratchPaint.sussyMode.shape
 });
 const mapDispatchToProps = dispatch => ({
@@ -1062,6 +1082,9 @@ const mapDispatchToProps = dispatch => ({
     },
     onPointCountSliderChange: polyCount => {
         dispatch(changeTrianglePointCount(polyCount));
+    },
+    onTriangleCornerSliderChange: triangleCornerSize => {
+        dispatch(changeTriangleCornerSize(triangleCornerSize));
     },
     onCurrentlySelectedShapeChange: shape => {
         dispatch(changeCurrentlySelectedShape(shape));

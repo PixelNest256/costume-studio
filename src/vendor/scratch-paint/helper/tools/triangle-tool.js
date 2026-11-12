@@ -2,7 +2,7 @@ import paper from '@scratch/paper';
 import Modes from '../../lib/modes';
 import { styleShape } from '../style-path';
 import { clearSelection } from '../selection';
-import { getSquareDimensions } from '../math';
+import { createPolygonInBounds, createPolygonPath, getPolygonPoints } from './polygon';
 import BoundingBoxTool from '../selection-tools/bounding-box-tool';
 import NudgeTool from '../selection-tools/nudge-tool';
 
@@ -49,6 +49,7 @@ class TriangleTool extends paper.Tool {
 
         this.sideCount = 3;
         this.pointCount = 1;
+        this.roundedCornerSize = 0;
     }
     getHitOptions() {
         return {
@@ -81,29 +82,25 @@ class TriangleTool extends paper.Tool {
         this.pointCount = pointCount;
         this.updateExistingShape();
     }
-    calculateSegments() {
-        let segs = [];
-
-        for (let i = 0; i < this.sideCount; i++) {
-            let angle = (i / this.sideCount) * Math.PI * 2;
-            let angleIn = angle + (1 / this.sideCount) * Math.PI;
-
-            segs.push(new paper.Point(Math.sin(angle) * 50, -Math.cos(angle) * 50))
-            if (this.pointCount !== 1) {
-                segs.push(new paper.Point(Math.sin(angleIn) * 50 * this.pointCount, -Math.cos(angleIn) * 50 * this.pointCount));
-            }
-        }
-
-        return segs;
+    setRoundedCornerSize(roundedCornerSize) {
+        this.roundedCornerSize = roundedCornerSize;
+        this.updateExistingShape();
+    }
+    calculateSegments(radius = 50) {
+        return getPolygonPoints(this.sideCount, this.pointCount, radius);
     }
     updateExistingShape() {
-        // if editing a tri, update the curves
-        const oldTri = paper.project.selectedItems[0];
-        if (oldTri) {
-            const path = new paper.Path({segments: this.calculateSegments(), closed: true});
-            path.bounds = oldTri.bounds;
-            oldTri.segments = path.segments;
-            oldTri.closed = true;
+        // Update the selected polygon in place, preserving its bounds and style.
+        const oldPolygon = paper.project.selectedItems[0];
+        if (oldPolygon && oldPolygon.bounds) {
+            const path = createPolygonInBounds(
+                oldPolygon.bounds,
+                this.sideCount,
+                this.pointCount,
+                this.roundedCornerSize
+            );
+            oldPolygon.segments = path.segments;
+            oldPolygon.closed = true;
             path.remove();
             this.setSelectedItems();
             this.onUpdateImage();
@@ -133,21 +130,34 @@ class TriangleTool extends paper.Tool {
             this.tri.remove();
         }
 
-        const bounds = new paper.Rectangle(event.downPoint, event.point);
-        const squareDimensions = getSquareDimensions(event.downPoint, event.point);
         if (event.modifiers.shift) {
-            bounds.size = squareDimensions.size.abs();
-        }
-
-        this.tri = new paper.Path({segments: this.calculateSegments(), closed: true});
-        this.tri.bounds = bounds;
-        if (event.modifiers.alt) {
-            this.tri.position = event.downPoint;
-        } else if (event.modifiers.shift) {
-            this.tri.position = squareDimensions.position;
+            // Shift means a regular polygon, not a square bounding box. Put all
+            // vertices on one circle so every side has the same length.
+            const vector = event.point.subtract(event.downPoint);
+            const radius = Math.max(1,
+                Math.max(Math.abs(vector.x), Math.abs(vector.y)) / (event.modifiers.alt ? 1 : 2));
+            const center = event.modifiers.alt ?
+                event.downPoint :
+                event.downPoint.add(vector.multiply(0.5));
+            this.tri = createPolygonPath(
+                this.calculateSegments(radius),
+                this.roundedCornerSize
+            );
+            this.tri.position = center;
         } else {
-            const dimensions = event.point.subtract(event.downPoint);
-            this.tri.position = event.downPoint.add(dimensions.multiply(0.5));
+            const bounds = new paper.Rectangle(event.downPoint, event.point);
+            this.tri = createPolygonInBounds(
+                bounds,
+                this.sideCount,
+                this.pointCount,
+                this.roundedCornerSize
+            );
+            if (event.modifiers.alt) {
+                this.tri.position = event.downPoint;
+            } else {
+                const dimensions = event.point.subtract(event.downPoint);
+                this.tri.position = event.downPoint.add(dimensions.multiply(0.5));
+            }
         }
 
         styleShape(this.tri, this.colorState);

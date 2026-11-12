@@ -29,7 +29,7 @@ const VECTOR_KEYBINDINGS = {
     t: Modes.TEXT,
     l: Modes.LINE,
     c: Modes.OVAL,
-    r: Modes.RECT,
+    r: Modes.TRIANGLE,
     p: Modes.PEN,
     y: Modes.TRIANGLE,
     v: Modes.ARROW,
