@@ -35,9 +35,13 @@ Modification date: 2026-11-11.
   Reshape mode (`helper/selection-tools/round-corners.js`), object effects
   (blur/shadow/glow via canvas and SVG filters, using the standard Scratch
   color picker), a multi-stop advanced gradient editor available from the
-  fill/stroke color pickers, a combined polygon/rectangle drawing tool with
-  side count, star ratio, rounded corners, and Shift-regular polygons, editor
-  range/stage options, stroke toggling,
+  fill/stroke color pickers, logical layers with active-layer editing,
+  per-layer visibility, opaque/translucent/hidden inactive-layer display,
+  hover highlighting, drag-to-reorder layers, delete confirmation with
+  contents removal, undoable layer deletion, and SVG layer metadata, a combined
+  polygon/rectangle drawing tool with side count, star ratio, rounded
+  corners, and Shift-regular polygons, editor range/stage options, stroke
+  toggling,
   keyboard shortcuts, custom fonts, color history, and the color palette
   panel.
 

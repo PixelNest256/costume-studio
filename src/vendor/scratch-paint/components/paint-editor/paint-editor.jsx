@@ -35,6 +35,7 @@ import ArrowMode from '../../containers/arrow-mode.jsx';
 import ReshapeMode from '../../containers/reshape-mode.jsx';
 import SelectMode from '../../containers/select-mode.jsx';
 import EffectsMode from '../../containers/effects-mode.jsx';
+import LayersBridge from '../../containers/layers-bridge.jsx';
 import PreciseTransformMode from '../../containers/precise-transform-mode.jsx';
 import PreciseTransformPanel from '../precise-transform-panel/precise-transform-panel.jsx';
 import StrokeColorIndicatorComponent from '../../containers/stroke-color-indicator.jsx';
@@ -108,6 +109,7 @@ const PaintEditorComponent = props => {
             data-paint-theme={props.theme}
             dir={props.rtl ? 'rtl' : 'ltr'}
         >
+            <LayersBridge onUpdateImage={props.onUpdateImage}/>
             {props.canvas !== null ? ( // eslint-disable-line no-negated-condition
                 <div className={styles.editorContainerTop}>
                     {/* First row */}

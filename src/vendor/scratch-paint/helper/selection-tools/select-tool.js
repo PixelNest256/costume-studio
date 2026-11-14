@@ -6,6 +6,7 @@ import BoundingBoxTool from './bounding-box-tool';
 import NudgeTool from './nudge-tool';
 import SelectionBoxTool from './selection-box-tool';
 import paper from '@scratch/paper';
+import {isItemInActiveLayer} from '../layers';
 
 /**
  * paper.Tool that handles select mode. This is made up of 2 subtools.
@@ -99,6 +100,7 @@ class SelectTool extends paper.Tool {
             guide: false,
             tolerance: SelectTool.TOLERANCE / paper.view.zoom,
             match: hitResult => {
+                if (!isItemInActiveLayer(hitResult.item)) return false;
                 // Don't match helper items, unless they are handles.
                 if (!hitResult.item.data || !hitResult.item.data.isHelperItem) return true;
                 return hitResult.item.data.isScaleHandle || hitResult.item.data.isRotHandle;

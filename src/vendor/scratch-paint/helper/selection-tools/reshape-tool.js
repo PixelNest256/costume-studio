@@ -13,6 +13,7 @@ import HandleTool from './handle-tool';
 import SelectionBoxTool from './selection-box-tool';
 import RoundCornersOverlay from './round-corners';
 import {getNudgeSettings} from '../../../../lib/features.js';
+import {isItemInActiveLayer} from '../layers';
 
 /** Modes of the reshape tool, which can do many things depending on how it's used. */
 const ReshapeModes = keyMirror({
@@ -106,6 +107,7 @@ class ReshapeTool extends paper.Tool {
             segments: true,
             tolerance: ReshapeTool.TOLERANCE / paper.view.zoom,
             match: hitResult => {
+                if (!isItemInActiveLayer(hitResult.item)) return false;
                 if (hitResult.type !== 'segment') return false;
                 if (hitResult.item.data && hitResult.item.data.noHover) return false;
                 if (!hitResult.item.selected) return false;
@@ -125,6 +127,7 @@ class ReshapeTool extends paper.Tool {
             handles: true,
             tolerance: ReshapeTool.TOLERANCE / paper.view.zoom,
             match: hitResult => {
+                if (!isItemInActiveLayer(hitResult.item)) return false;
                 if (hitResult.item.data && hitResult.item.data.noHover) return false;
                 // Only hit test against handles that are visible, that is,
                 // their segment is selected
@@ -151,6 +154,7 @@ class ReshapeTool extends paper.Tool {
             guide: false,
             tolerance: ReshapeTool.TOLERANCE / paper.view.zoom,
             match: hitResult => {
+                if (!isItemInActiveLayer(hitResult.item)) return false;
                 if (hitResult.type !== 'curve') return false;
                 if (!hitResult.item.selected) return false;
                 if (hitResult.item.data && hitResult.item.data.noHover) return false;
@@ -172,6 +176,7 @@ class ReshapeTool extends paper.Tool {
             curves: true,
             tolerance: ReshapeTool.TOLERANCE / paper.view.zoom,
             match: hitResult => {
+                if (!isItemInActiveLayer(hitResult.item)) return false;
                 if (hitResult.item.data && hitResult.item.data.noHover) return false;
                 return true;
             }

@@ -1,4 +1,5 @@
 import paper from '@scratch/paper';
+import {isItemInActiveLayer} from '../layers';
 import Modes from '../../lib/modes';
 import {clearSelection, getSelectedLeafItems} from '../selection';
 import BoundingBoxTool from '../selection-tools/bounding-box-tool';
@@ -103,6 +104,7 @@ class TextTool extends paper.Tool {
             fill: true,
             guide: false,
             match: hitResult => hitResult.item &&
+                isItemInActiveLayer(hitResult.item) &&
                 !(hitResult.item.data && hitResult.item.data.isHelperItem) &&
                 !hitResult.item.selected, // Unselected only
             tolerance: TextTool.TOLERANCE / paper.view.zoom

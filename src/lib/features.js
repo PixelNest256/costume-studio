@@ -10,16 +10,16 @@ export const DEFAULT_FEATURES = {
     snapPageCenter: true,
     snapPageAxes: true,
     snapPageEdges: true,
-    snapPageCorners: false,
+    snapPageCorners: true,
     snapObjectEdges: true,
     snapObjectCenters: true,
     snapObjectMidlines: true,
-    snapObjectCorners: false,
+    snapObjectCorners: true,
     snapBoxCenter: true,
-    snapBoxCorners: false,
-    snapBoxEdgeMids: false,
+    snapBoxCorners: true,
+    snapBoxEdgeMids: true,
     snapCtrlDisable: true,
-    snapTextToPath: false,
+    snapTextToPath: true,
     pasteNoOffset: true,
     autoBackup: true,
     // Nudge: when fixed is on, the numeric values are in project units
@@ -99,8 +99,7 @@ export const FEATURE_GROUPS = [
     }
 ];
 
-const FEATURE_SCHEMA_VERSION = 2;
-const NEW_ENABLED_DEFAULTS = ['nudgeFixed', 'infiniteCanvas', 'repeatStage'];
+const FEATURE_SCHEMA_VERSION = 3;
 
 const isPlainObject = value => (value && typeof value === 'object' && !Array.isArray(value));
 
@@ -129,9 +128,13 @@ export const loadFeatureState = () => {
             }
         }
         if (!isCurrentSchema) {
-            // Migrate older sessions to the new opt-out defaults once. After
-            // this, a user's explicit false value is preserved.
-            for (const key of NEW_ENABLED_DEFAULTS) enabled[key] = true;
+            // Migrate older sessions to the new defaults once. After this,
+            // explicit user choices are preserved.
+            for (const key of Object.keys(DEFAULT_FEATURES)) {
+                if (typeof DEFAULT_FEATURES[key] === 'boolean') {
+                    enabled[key] = DEFAULT_FEATURES[key];
+                }
+            }
         }
         return {version: FEATURE_SCHEMA_VERSION, enabled};
     } catch (error) {

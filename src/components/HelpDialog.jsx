@@ -27,6 +27,7 @@ const HelpDialog = ({sourceUrl, licenseUrl, onClose, onOpenSample}) => {
 
     const features = [
         ['help.feature.vector', VectorIcon],
+        ['help.feature.layers', VectorIcon],
         ['help.feature.bitmap', BitmapIcon],
         ['help.feature.files', FolderIcon],
         ['help.feature.export', DownloadIcon],

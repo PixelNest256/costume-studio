@@ -5,6 +5,7 @@ import {getItemsGroup, isGroup} from './group';
 import {getRootItem, isCompoundPathItem, isBoundsItem, isPathItem, isPGTextItem} from './item';
 import {getItemsCompoundPath, isCompoundPath, isCompoundPathChild} from './compound-path';
 import {sortItemsByZIndex} from './math';
+import {ensureItemLayers, isItemInActiveLayer} from './layers';
 
 /**
  * Wrapper for paper.project.getItems that excludes our helper items
@@ -18,6 +19,7 @@ const getItems = function (options) {
             !item.locked &&
             !item.isClipMask() &&
             !(item.data && item.data.isHelperItem) &&
+            isItemInActiveLayer(item) &&
             (!options.match || options.match(item));
     };
     const newOptions = {...options, match: newMatcher};
@@ -49,10 +51,12 @@ const getAllRootItems = function (includeGuides) {
  *     that aren't guide items or helper items.
  */
 const getAllSelectableRootItems = function () {
+    ensureItemLayers();
     const allItems = getAllRootItems();
     const selectables = [];
     for (let i = 0; i < allItems.length; i++) {
-        if (allItems[i].data && !allItems[i].data.isHelperItem) {
+        if (allItems[i].data && !allItems[i].data.isHelperItem &&
+                isItemInActiveLayer(allItems[i])) {
             selectables.push(allItems[i]);
         }
     }
@@ -177,12 +181,14 @@ const getSelectedRootItems = function () {
  * @returns {Array<paper.Item>} in increasing Z order.
  */
 const getSelectedLeafItems = function () {
+    ensureItemLayers();
     const allItems = paper.project.selectedItems;
     const items = [];
 
     for (let i = 0; i < allItems.length; i++) {
         const item = allItems[i];
-        if (!(item instanceof paper.Layer) && !isGroup(item) && item.data && !item.data.isSelectionBound) {
+        if (!(item instanceof paper.Layer) && !isGroup(item) && item.data &&
+                !item.data.isSelectionBound && isItemInActiveLayer(item)) {
             items.push(item);
         }
     }

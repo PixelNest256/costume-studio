@@ -9,6 +9,7 @@ import log from '../log/log';
 
 import {stripInvalidPaperData} from '../helper/strip-invalid-paper-data';
 import {performSnapshot} from '../helper/undo';
+import {readLayersFromSvg} from '../helper/layers';
 import {undoSnapshot, clearUndoState} from '../reducers/undo';
 import {isGroup, ungroupItems} from '../helper/group';
 import {applyWorkspaceSettings, clearRaster, convertBackgroundGuideLayer, getRaster, refreshStageFrames, setupLayers, updateTheme} from '../helper/layer';
@@ -282,6 +283,7 @@ class PaperCanvas extends React.Component {
         const viewBox = viewBoxParts ? viewBoxParts.map(parseFloat) : null;
 
         try {
+            readLayersFromSvg(svg);
             paper.project.importSVG(svg, {
                 expandShapes: true,
                 onLoad: item => {

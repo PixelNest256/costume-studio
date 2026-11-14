@@ -4,6 +4,7 @@ import paper from '@scratch/paper';
 import {hideGuideLayers, showGuideLayers, getRaster} from '../helper/layer';
 import {getSelectedLeafItems} from '../helper/selection';
 import Formats, {isVector, isBitmap} from '../lib/format';
+import {applyLayerPresentation, deselectInactiveItems, getLayersSnapshot, normalizeLayerOrder, prepareLayerPresentation, restoreLayerPresentation, restoreLayersSnapshot} from './layers';
 import log from '../log/log';
 
 /**
@@ -16,10 +17,13 @@ const performSnapshot = function (dispatchPerformSnapshot, format) {
         log.error('Format must be specified.');
     }
     const guideLayers = hideGuideLayers();
+    prepareLayerPresentation();
     dispatchPerformSnapshot({
         json: paper.project.exportJSON({asString: false}),
+        layers: getLayersSnapshot(),
         paintEditorFormat: format
     });
+    restoreLayerPresentation();
     showGuideLayers(guideLayers);
 };
 
@@ -34,6 +38,10 @@ const _restore = function (entry, setSelectedItems, onUpdateImage, isBitmapMode)
         }
     }
     paper.project.importJSON(entry.json);
+    restoreLayersSnapshot(entry.layers);
+    applyLayerPresentation();
+    normalizeLayerOrder();
+    deselectInactiveItems();
     setSelectedItems();
 
     // Ensure that all rasters are loaded before updating storage with new image data.

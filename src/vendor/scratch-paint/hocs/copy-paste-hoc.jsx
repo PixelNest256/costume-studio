@@ -13,6 +13,7 @@ import {
 } from '../helper/selection';
 import {getTrimmedRaster} from '../helper/bitmap';
 import Formats, {isBitmap} from '../lib/format';
+import {applyLayerPresentation, getActiveLayerId, normalizeLayerOrder} from '../helper/layers';
 import Modes from '../lib/modes';
 
 import {clearSelectedItems, setSelectedItems} from '../reducers/selected-items';
@@ -92,7 +93,12 @@ const CopyPasteHOC = function (WrappedComponent) {
             } catch (error) {
                 // ignore
             }
+            const activeLayerId = getActiveLayerId();
             for (const item of items) {
+                if (!item.data) item.data = {};
+                // Clipboard JSON carries the source layer. Paste should always
+                // create the copy in the layer that is active right now.
+                item.data.layerId = activeLayerId;
                 const placedItem = paper.project.getActiveLayer().addChild(item);
                 placedItem.selected = true;
                 if (!pasteNoOffset) {
@@ -103,6 +109,8 @@ const CopyPasteHOC = function (WrappedComponent) {
             if (!pasteNoOffset) {
                 this.props.incrementPasteOffset();
             }
+            normalizeLayerOrder();
+            applyLayerPresentation();
             this.props.setSelectedItems(this.props.format);
             this.props.onUpdateImage();
         }

@@ -3,6 +3,7 @@ import {isBoundsItem, getRootItem} from './item';
 import {hoverBounds, hoverItem} from './guides';
 import {isGroupChild} from './group';
 import {sortItemsByZIndex} from './math';
+import {isItemInActiveLayer} from './layers';
 
 /**
  * @param {!MouseEvent} event mouse event
@@ -15,6 +16,7 @@ const getHoveredItem = function (event, hitOptions, subselect) {
     const oldMatch = hitOptions.match;
     hitOptions.match = hitResult => {
         if (hitResult.item.data && hitResult.item.data.noHover) return false;
+        if (!isItemInActiveLayer(hitResult.item)) return false;
         return oldMatch ? oldMatch(hitResult) : true;
     };
     const hitResults = paper.project.hitTestAll(event.point, hitOptions);

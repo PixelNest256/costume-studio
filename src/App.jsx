@@ -8,6 +8,7 @@ import {inlineSvgFonts} from '@scratch/scratch-svg-renderer';
 import BackupDialog from './components/BackupDialog.jsx';
 import SvgCodePanel from './components/SvgCodePanel.jsx';
 import ColorPalettePanel from './components/ColorPalettePanel.jsx';
+import LayersPanel from './components/LayersPanel.jsx';
 import ConfirmDialog from './components/ConfirmDialog.jsx';
 import FeaturesMenu from './components/FeaturesMenu.jsx';
 import HelpDialog from './components/HelpDialog.jsx';
@@ -97,6 +98,7 @@ const App = () => {
     const [fontManagerOpen, setFontManagerOpen] = useState(false);
     const [codePanelOpen, setCodePanelOpen] = useState(false);
     const [paletteOpen, setPaletteOpen] = useState(false);
+    const [layersOpen, setLayersOpen] = useState(false);
     const [saveMenuRequest, setSaveMenuRequest] = useState(0);
     const [backupOpen, setBackupOpen] = useState(false);
     const [backups, setBackups] = useState(loadBackups);
@@ -224,8 +226,9 @@ const App = () => {
     };
 
     useEffect(() => {
-        // The vendored canvas reads these settings directly from localStorage.
-        // Notify it after React has persisted the new values.
+        // Persist the initial state too, so schema migrations are visible to
+        // the vendored canvas, which reads localStorage directly.
+        saveFeatureState(featurePrefs);
         window.dispatchEvent(new Event('costume-studio:features-changed'));
     }, [featurePrefs]);
 
@@ -763,6 +766,18 @@ const App = () => {
                     >
                         <span className="action-label">{t('code.title', 'SVG code')}</span>
                     </button>
+                    {doc.format === 'vector' ? (
+                        <button
+                            aria-label={t('layers.title', 'Layers')}
+                            aria-pressed={layersOpen}
+                            className={`button button-ghost${layersOpen ? ' is-active' : ''}`}
+                            onClick={() => setLayersOpen(value => !value)}
+                            title={t('layers.title', 'Layers')}
+                            type="button"
+                        >
+                            <span className="action-label">{t('layers.title', 'Layers')}</span>
+                        </button>
+                    ) : null}
                     <button
                         aria-label={t('palette.title', 'Color palette')}
                         aria-pressed={paletteOpen}
@@ -814,6 +829,10 @@ const App = () => {
                     onApplyColor={handlePaletteApply}
                     onClose={() => setPaletteOpen(false)}
                     visible={paletteOpen}
+                />
+                <LayersPanel
+                    onClose={() => setLayersOpen(false)}
+                    visible={layersOpen}
                 />
             </main>
 

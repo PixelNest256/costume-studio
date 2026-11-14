@@ -3,6 +3,7 @@ import {getHoveredItem} from '../hover';
 import {expandBy} from '../math';
 import {createGradientObject} from '../style-path';
 import GradientTypes from '../../lib/gradient-types';
+import {isItemInActiveLayer} from '../layers';
 
 class FillTool extends paper.Tool {
     static get TOLERANCE () {
@@ -52,6 +53,7 @@ class FillTool extends paper.Tool {
             fill: true,
             guide: false,
             match: function (hitResult) {
+                if (!isItemInActiveLayer(hitResult.item)) return false;
                 // Allow fills to be hit only if the item has a fill already or the path is closed/nearly closed
                 const hitFill = hitResult.item.hasFill() || hitResult.item.closed || isAlmostClosedPath(hitResult.item);
                 if (hitResult.item instanceof paper.Path &&

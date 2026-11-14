@@ -16,6 +16,7 @@ import {commitRectToBitmap, commitOvalToBitmap, commitSelectionToBitmap, getHitB
 import {performSnapshot} from '../helper/undo';
 import {applyEffectsToSvg} from '../helper/effects';
 import {scaleWithStrokes} from '../helper/math';
+import {attachLayersToSvg, normalizeLayerOrder, prepareLayerPresentation, restoreLayerPresentation} from '../helper/layers';
 
 import {
     ART_BOARD_WIDTH, ART_BOARD_HEIGHT, SVG_ART_BOARD_WIDTH, SVG_ART_BOARD_HEIGHT,
@@ -129,6 +130,8 @@ const UpdateImageHOC = function (WrappedComponent) {
                 paper.project.activeLayer.clipped = false;
                 workspaceMask.remove();
             }
+            normalizeLayerOrder();
+            prepareLayerPresentation();
             const guideLayers = hideGuideLayers(true /* includeRaster */);
 
             // Export at 0.5x
@@ -150,7 +153,7 @@ const UpdateImageHOC = function (WrappedComponent) {
             });
             this.props.onUpdateImage(
                 true /* isVector */,
-                applyEffectsToSvg(exportedSvg, 0.5),
+                attachLayersToSvg(applyEffectsToSvg(exportedSvg, 0.5)),
                 centerX,
                 centerY);
             scaleWithStrokes(paper.project.activeLayer, 2, new paper.Point());
@@ -167,6 +170,7 @@ const UpdateImageHOC = function (WrappedComponent) {
             if (!skipSnapshot) {
                 performSnapshot(this.props.undoSnapshot, Formats.VECTOR);
             }
+            restoreLayerPresentation();
         }
         render () {
             const componentProps = omit(this.props, [

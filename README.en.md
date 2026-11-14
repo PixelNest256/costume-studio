@@ -17,6 +17,11 @@ runs in your browser.
 
 - **Scratch paint editor** — select, reshape, brush, eraser, fill, text, line,
   circle, and rectangle tools, layer ordering, grouping, and rotation center.
+- **Layers (vector only)** — add, delete, rename, reorder, show, or hide layers
+  from the Layers panel. Only the active layer can be edited; other layers can
+  be shown opaque, translucent, or hidden, and hovering a row highlights its
+  bounds. Layer structure is saved in the SVG and restored on reload, with undo
+  support.
 - **Vector and bitmap modes** — draw vectors and convert to bitmap when needed.
 - **Import** — open SVG, PNG, and JPG files by picker or drag and drop.
 - **Export** — choose SVG, SVG with text converted to paths, PNG (1×), or PNG (2×) from the
